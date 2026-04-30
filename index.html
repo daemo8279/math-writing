@@ -53,8 +53,10 @@ body{font-family:var(--font);background:var(--gF7);min-height:100vh;
 .pq{font-size:15px;font-weight:700;color:var(--black);line-height:1.65;margin-top:8px}
 
 /* ── 스크롤 영역 ── */
-.scroll{flex:1;overflow-y:auto;padding:14px 20px 16px}
+.scroll{flex:1;overflow-y:auto;padding:14px 20px 16px;position:relative}
 .scroll::-webkit-scrollbar{display:none}
+/* 스크롤 잠금 (모달 열릴 때) */
+.scroll.locked{overflow:hidden}
 
 /* ── 완료 단계 헤더 ── */
 .done-hd{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--gF7);border-radius:var(--rlg);margin-bottom:8px}
@@ -295,6 +297,52 @@ body{font-family:var(--font);background:var(--gF7);min-height:100vh;
 /* ── 직접쓰기 흔들기 ── */
 @keyframes shk-inp{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}60%{transform:translateX(6px)}}
 .write-input.shk{animation:shk-inp .35s ease}
+
+/* ══ 서술형 모드 ══ */
+.mode-toggle{display:flex;gap:6px;margin-bottom:12px;background:var(--gF7);border-radius:var(--rlg);padding:4px}
+.mode-btn{flex:1;padding:8px 0;font-family:var(--font);font-size:13px;font-weight:700;border:none;border-radius:var(--rf);cursor:pointer;transition:all .18s;color:var(--g77);background:transparent}
+.mode-btn.active{background:#fff;color:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.10)}
+.essay-area{width:100%;min-height:110px;border-radius:var(--rlg);border:1.5px solid var(--gEE);font-family:var(--font);font-size:14px;color:var(--black);padding:12px 14px;resize:vertical;line-height:1.7;outline:none;box-sizing:border-box;transition:border-color .15s}
+.essay-area:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(22,119,255,.1)}
+.essay-area.shk{animation:shk-inp .35s ease}
+.essay-hint{font-size:12px;color:var(--g99);margin-top:5px;line-height:1.5}
+/* 채점 결과 */
+.grade-result{background:#F8FAFF;border-radius:var(--rlg);border:1.5px solid #C2DCFC;padding:14px;margin-top:10px}
+.grade-score-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.grade-score{font-size:28px;font-weight:900;color:var(--blue)}
+.grade-score-max{font-size:13px;color:var(--g77);align-self:flex-end;padding-bottom:4px}
+.grade-badge{padding:3px 10px;border-radius:var(--rf);font-size:12px;font-weight:700}
+.grade-badge.s{background:#E8F5E9;color:#1B5E20}
+.grade-badge.a{background:#E3F2FD;color:#0D47A1}
+.grade-badge.b{background:#FFF8E1;color:#7A4500}
+.grade-badge.c{background:#FFEBEE;color:#B71C1C}
+.grade-dim{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.grade-dim-row{display:flex;align-items:center;gap:7px}
+.grade-dim-label{font-size:12px;font-weight:700;color:var(--g55);width:64px;flex-shrink:0}
+.grade-dim-bar{flex:1;height:7px;background:var(--gEE);border-radius:4px;overflow:hidden}
+.grade-dim-fill{height:100%;border-radius:4px;background:var(--blue);transition:width .6s ease}
+.grade-dim-val{font-size:11px;font-weight:700;color:var(--g55);width:26px;text-align:right;flex-shrink:0}
+.grade-fb-box{background:#fff;border-radius:var(--rsm);padding:10px 12px;margin-top:10px;font-size:13px;color:var(--black);line-height:1.65;border:1px solid var(--gEE)}
+.grade-model-ans{background:#F6FDED;border-radius:var(--rsm);padding:10px 12px;margin-top:8px;font-size:13px;color:#27500A;border-left:3px solid #4CAF50;line-height:1.65}
+.essay-loading{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#0050CC;padding:12px 0}
+
+/* ══ 직접 쓰기 모달 (스크롤 영역 내부) ══ */
+.ew-overlay{position:absolute;inset:0;background:rgba(255,255,255,.97);z-index:80;display:flex;flex-direction:column;border-radius:var(--rlg);animation:fi .18s ease}
+.ew-header{padding:13px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--gEE);flex-shrink:0}
+.ew-title{font-size:15px;font-weight:800;flex:1;color:var(--black)}
+.ew-canvas-wrap{flex:1;position:relative;overflow:hidden;background:#FAFBFF;min-height:0}
+#ew-canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+.ew-toolbar{padding:8px 12px;display:flex;align-items:center;gap:6px;border-top:1px solid var(--gEE);border-bottom:1px solid var(--gEE);background:#fff;flex-shrink:0;flex-wrap:wrap}
+.ew-footer{padding:10px 12px;display:flex;gap:8px;background:#fff;flex-shrink:0}
+.ew-btn{flex:1;padding:11px;border-radius:var(--rlg);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.ew-btn.pri{background:var(--blue);color:#fff}
+.ew-btn.pri:hover{background:#0050CC}
+.ew-btn.out{background:var(--gF7);color:var(--g55);border:1.5px solid var(--gEE)}
+.ew-btn.out:hover{background:var(--gEE)}
+.ew-btn:disabled{background:var(--gEE);color:var(--g99);cursor:not-allowed}
+/* AI 채점 로딩 */
+.ew-grading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px;flex:1}
+.ew-grading-dots{display:flex;gap:8px}
 </style>
 </head>
 <body>
@@ -733,20 +781,26 @@ const GRADE_INFO = {
 const ST = {
   screen: 'intro',
   grade: null,
-  selTopic: null,        // 선택된 유형 (null = 전체)
+  selTopic: null,
   PS: [],
   pi: 0,
   xp: 24, correct: 0, wrong: 0, weakTypes: [],
   step: 1, doneSteps: [], sub: 'start',
   whatSel: null, numSel: [], opSel: null, eqSel: null,
-  step4Write: '',        // 직접 쓰기 입력값
-  step4Tracked: false,   // 이 문제 채점 여부
+  step4Write: '',
+  step4Tracked: false,
+  /* ── 서술형 모드 ── */
+  mode: 'choice',        // 'choice' | 'essay'
+  essayText: '',         // 서술형 답변 입력값
+  essayResult: null,     // AI 채점 결과 { score, accuracy, process, expression, feedback, modelAnswer }
+  essayGrading: false,   // 채점 중 여부
 };
 
 function resetSteps(){
   ST.step=1; ST.doneSteps=[]; ST.sub='start';
   ST.whatSel=null; ST.numSel=[]; ST.opSel=null; ST.eqSel=null;
   ST.step4Write=''; ST.step4Tracked=false;
+  ST.essayText=''; ST.essayResult=null; ST.essayGrading=false;
 }
 
 const $a = document.getElementById('app');
@@ -929,8 +983,8 @@ function buildCurrentStep(p){
   if(s===1) return buildStep1(p);
   if(s===2) return buildStep2(p);
   if(s===3) return buildStep3(p);
-  if(s===4) return buildStep4(p);
-  if(s===5) return buildStep5(p);
+  if(s===4) return ST.mode==='essay' ? buildStep4Essay(p) : buildStep4(p);
+  if(s===5) return ST.mode==='essay' ? buildStep5Essay(p) : buildStep5(p);
   return '';
 }
 
@@ -938,6 +992,10 @@ function buildStep1(p){
   const gi=GRADE_INFO[ST.grade];
   return `<div class="cur-card fi">
     <span class="cur-chip" style="background:${p.tb};color:${p.tc}">1단계 · 문제 읽기</span>
+    <div class="mode-toggle">
+      <button class="mode-btn ${ST.mode==='choice'?'active':''}" onclick="setMode('choice')">📝 객관식</button>
+      <button class="mode-btn ${ST.mode==='essay'?'active':''}" onclick="setMode('essay')">✏️ 서술형</button>
+    </div>
     <div style="font-size:14px;color:var(--g77);line-height:1.6">
       위 문제를 천천히 읽어보세요.<br>빨간 박스 단어에 주목해요.
     </div>
@@ -1154,6 +1212,73 @@ function buildStep5(p){
   </div>`;
 }
 
+/* ════════════════════════════════════════════
+   서술형 모드 — 4단계: 풀이 쓰기
+   ════════════════════════════════════════════ */
+function buildStep4Essay(p){
+  if(ST.essayGrading){
+    return `<div class="cur-card fi">
+      <span class="cur-chip" style="background:#F3F3F3;color:#555">4단계 · 서술형 풀이</span>
+      <div class="cur-q">AI가 채점하고 있어요</div>
+      <div class="essay-loading">
+        <div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div>
+        <span>풀이를 분석 중이에요...</span>
+      </div>
+    </div>`;
+  }
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:#F3F3F3;color:#555">4단계 · 서술형 풀이</span>
+    <div class="cur-q">풀이 과정과 답을 직접 써봐요 ✏️</div>
+    <textarea id="essay-inp" class="essay-area"
+      placeholder="풀이 과정과 답을 자세히 써봐요.
+예) 5 + 3 = 8이므로 색연필은 모두 8자루입니다."
+      oninput="ST.essayText=this.value"
+    >${escHtml(ST.essayText)}</textarea>
+    <div class="essay-hint">💡 풀이 과정을 단계별로 쓸수록 더 높은 점수를 받아요!</div>
+    <button class="scratch-open-btn" style="margin-top:8px" onclick="openEssayWrite()">
+      ✍️ 손으로 직접 쓰기 (AI 채점)
+    </button>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════
+   서술형 모드 — 5단계: AI 채점 결과
+   ════════════════════════════════════════════ */
+function buildStep5Essay(p){
+  const r=ST.essayResult;
+  if(!r) return `<div class="cur-card fi"><div class="cur-q">채점 결과를 불러오는 중...</div></div>`;
+
+  const sc=Number(r.score)||0;
+  const badgeLabel=sc>=90?'최우수':sc>=70?'우수':sc>=50?'보통':'노력 필요';
+  const badgeCls=sc>=90?'s':sc>=70?'a':sc>=50?'b':'c';
+
+  const dims=[
+    {label:'정확성', val:Number(r.accuracy)||0},
+    {label:'풀이과정', val:Number(r.process)||0},
+    {label:'표현력', val:Number(r.expression)||0},
+  ];
+  const dimHtml=dims.map(d=>`
+    <div class="grade-dim-row">
+      <span class="grade-dim-label">${d.label}</span>
+      <div class="grade-dim-bar"><div class="grade-dim-fill" style="width:${d.val}%"></div></div>
+      <span class="grade-dim-val">${d.val}</span>
+    </div>`).join('');
+
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:#F3F3F3;color:#555">5단계 · AI 채점 결과</span>
+    <div class="grade-result">
+      <div class="grade-score-row">
+        <span class="grade-score">${sc}</span>
+        <span class="grade-score-max">/ 100점</span>
+        <span class="grade-badge ${badgeCls}" style="margin-left:4px">${badgeLabel}</span>
+      </div>
+      <div class="grade-dim">${dimHtml}</div>
+    </div>
+    <div class="grade-fb-box">💬 ${escHtml(r.feedback||'')}</div>
+    ${r.modelAnswer?`<div class="grade-model-ans">📖 <strong>모범 답안</strong><br>${escHtml(r.modelAnswer)}</div>`:''}
+  </div>`;
+}
+
 /* ── 하단 버튼 ── */
 function buildBottomBtn(p){
   const s=ST.step,sub=ST.sub;
@@ -1175,6 +1300,12 @@ function buildBottomBtn(p){
     if(sub==='op_fb') return `<button class="cta cpri" onclick="finishStep3()">식 세우기 →</button>`;
   }
   if(s===4){
+    if(ST.mode==='essay'){
+      if(ST.essayGrading) return `<button class="cta cdis">채점 중...</button>`;
+      return ST.essayText.trim()
+        ?`<button class="cta cpri" onclick="submitEssay()">✨ AI 채점 받기</button>`
+        :`<button class="cta cdis">풀이를 먼저 써주세요</button>`;
+    }
     if(sub==='write') return `<button class="cta cpri" onclick="confirmWrite()">정답 확인 →</button>`;
     if(sub==='write_wrong_fb') return '';
     if(sub==='write_correct') return '';
@@ -1184,6 +1315,11 @@ function buildBottomBtn(p){
     if(sub==='eq_wrong_fb'||sub==='eq_correct') return '';
   }
   if(s===5){
+    if(ST.mode==='essay'){
+      const last=ST.pi>=ST.PS.length-1;
+      return `<button class="cta cpri" onclick="nxt()">${last?'결과 보기 →':'다음 문제 →'}</button>
+              <button class="cta cout" onclick="resetCur()">이 문제 다시 풀기</button>`;
+    }
     const last=ST.pi>=ST.PS.length-1;
     return `<button class="cta cpri" onclick="nxt()">${last?'결과 보기 →':'다음 문제 →'}</button>
             <button class="cta cout" onclick="resetCur()">이 문제 다시 풀기</button>`;
@@ -1195,6 +1331,15 @@ function buildBottomBtn(p){
    액션 함수 (v4와 동일)
    ════════════════════════════════════════════ */
 function ok1(){ ST.doneSteps.push(1); ST.step=2; ST.sub='start'; render(); }
+
+/* ── 모드 전환 ── */
+function setMode(m){
+  if(ST.mode===m) return;
+  ST.mode=m;
+  // 이미 진행 중이면 처음부터
+  if(ST.step>1){ resetSteps(); }
+  render();
+}
 function selWhat(i){ ST.whatSel=i; render(); }
 function confirmWhat(){ ST.sub='what_fb'; render(); }
 function showNums(){ ST.sub='nums'; render(); }
@@ -1249,6 +1394,61 @@ function confirmEq(){
 }
 function retryEq(){ ST.eqSel=null; ST.sub='choice'; render(); }
 function skipToStep5(){ ST.doneSteps.push(4); ST.step=5; ST.sub='start'; render(); }
+/* ── 서술형 제출 + AI 채점 ── */
+async function submitEssay(){
+  const text = ST.essayText.trim();
+  if(!text) return;
+
+  const inp = document.getElementById('essay-inp');
+  if(inp){ inp.classList.remove('shk'); void inp.offsetWidth; }
+
+  ST.essayGrading = true;
+  render();
+
+  const p = ST.PS[ST.pi];
+  const bp = p.eq.blankPos!==undefined ? p.eq.blankPos : 2;
+  const result = p.eq.result!==undefined ? p.eq.result : p.eq.ans;
+  const eqFull = bp===0 ? `${p.eq.ans} ${p.eq.op} ${p.eq.g[1]} = ${result}`
+               : bp===1 ? `${p.eq.g[0]} ${p.eq.op} ${p.eq.ans} = ${result}`
+               :          `${p.eq.g[0]} ${p.eq.op} ${p.eq.g[1]} = ${result}`;
+  const probTxt = p.sh.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+  const qTxt    = p.qh.replace(/<[^>]+>/g,'').trim();
+
+  try {
+    const res = await fetch('/api/grade', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        problem: { text: probTxt, question: qTxt, equation: eqFull, answer: String(p.eq.ans) },
+        studentAnswer: text,
+      }),
+    });
+    if(!res.ok){
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e.error || `서버 오류 (HTTP ${res.status})`);
+    }
+    ST.essayResult = await res.json();
+    // XP 반영
+    const sc = Number(ST.essayResult.score)||0;
+    if(!ST.step4Tracked){
+      ST.xp += sc>=70 ? 5 : sc>=50 ? 3 : 1;
+      if(sc>=70) ST.correct++; else ST.wrong++;
+      ST.step4Tracked = true;
+    }
+  } catch(err) {
+    ST.essayResult = {
+      score: 0, accuracy: 0, process: 0, expression: 0,
+      feedback: `채점 중 오류가 발생했어요: ${err.message}`,
+      modelAnswer: eqFull,
+    };
+  } finally {
+    ST.essayGrading = false;
+    ST.doneSteps.push(4);
+    ST.step = 5;
+    render();
+  }
+}
+
 function nxt(){
   if(ST.pi<ST.PS.length-1){ ST.pi++; resetSteps(); render(); }
   else{ ST.screen='done'; render(); }
@@ -1318,18 +1518,87 @@ function restartGrade(){ startGrade(ST.grade); }
 function goGradeSelect(){ ST.screen='grade-select'; render(); }
 function goIntro(){ ST.screen='intro'; ST.grade=null; ST.selTopic=null; render(); }
 
+/* ── TTS 상태 ── */
+let _ttsPlaying = false;
+
 function tts(id){
   let p=null;
   for(const g of Object.values(ALL_PROBLEMS)){
     p=g.find(x=>x.id===id); if(p) break;
   }
   if(!p) return;
-  const txt=p.sh.replace(/<[^>]+>/g,'')+' '+p.qh.replace(/<[^>]+>/g,'');
-  if('speechSynthesis' in window){
+
+  const txt = (p.sh.replace(/<[^>]+>/g,'') + ' ' + p.qh.replace(/<[^>]+>/g,'')).replace(/\s+/g,' ').trim();
+  const btn = document.querySelector('.tts');
+
+  if(!('speechSynthesis' in window)){
+    if(btn){ btn.textContent='🔇 이 브라우저는 음성을 지원하지 않아요'; }
+    return;
+  }
+
+  /* 재생 중이면 중지 */
+  if(_ttsPlaying){
     window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(txt);
-    u.lang='ko-KR'; u.rate=0.88;
-    window.speechSynthesis.speak(u);
+    _ttsPlaying = false;
+    _setTtsBtn(btn, false);
+    return;
+  }
+
+  /* 음성 목록 로드 후 실행하는 내부 함수 */
+  function _speak(){
+    window.speechSynthesis.cancel();
+    _ttsPlaying = false;
+
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'ko-KR';
+    u.rate = 0.88;
+
+    /* 한국어 voice 명시 선택 (있을 때만) */
+    const voices = window.speechSynthesis.getVoices();
+    const koVoice = voices.find(v => v.lang.startsWith('ko'));
+    if(koVoice) u.voice = koVoice;
+
+    u.onstart = () => { _ttsPlaying = true; _setTtsBtn(btn, true); };
+    u.onend   = () => { _ttsPlaying = false; _setTtsBtn(btn, false); };
+    u.onerror = () => { _ttsPlaying = false; _setTtsBtn(btn, false); };
+
+    /* Chrome cancel() 직후 speak() 씹힘 버그 → 약간 딜레이 후 실행 */
+    setTimeout(() => window.speechSynthesis.speak(u), 120);
+  }
+
+  const voices = window.speechSynthesis.getVoices();
+  if(voices.length > 0){
+    _speak();
+  } else {
+    /* 음성 목록이 아직 로드 안 됐을 때 — voiceschanged 이벤트 대기 */
+    _setTtsBtn(btn, null, '로딩 중...');
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      _speak();
+    };
+    /* 2초 내 이벤트 없으면 그냥 실행 (일부 브라우저 이벤트 미지원) */
+    setTimeout(() => {
+      if(!_ttsPlaying) _speak();
+    }, 2000);
+  }
+}
+
+function _setTtsBtn(btn, playing, label){
+  if(!btn) return;
+  if(playing === true){
+    btn.innerHTML = `<div class="tts-ic"><svg width="8" height="10" viewBox="0 0 8 10">
+      <rect x="1" y="1" width="2" height="8" rx="1"/><rect x="5" y="1" width="2" height="8" rx="1"/>
+    </svg></div> 멈추기`;
+    btn.style.background = '#FFF0F0';
+    btn.style.borderColor = '#FB1A18';
+    btn.style.color = '#FB1A18';
+  } else if(playing === false){
+    btn.innerHTML = `<div class="tts-ic"><svg width="8" height="10" viewBox="0 0 8 10"><path d="M0 0L8 5L0 10V0Z"/></svg></div> 문제 듣기`;
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  } else {
+    btn.innerHTML = `<div class="tts-ic">⏳</div> ${label||''}`;
   }
 }
 
@@ -1535,13 +1804,16 @@ async function analyzeWithAI(){
   const probTxt=p.sh.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
   const qTxt=p.qh.replace(/<[^>]+>/g,'').trim();
 
-  /* 캔버스 → 흰 배경 합성 → base64 PNG */
+  /* 캔버스 → 흰 배경 합성 → 최대 800px로 축소 → JPEG base64 (용량 절약) */
   const tmp=document.createElement('canvas');
-  tmp.width=canvas.width; tmp.height=canvas.height;
+  const MAX=800;
+  const scale=Math.min(1, MAX/Math.max(canvas.width, canvas.height));
+  tmp.width=Math.round(canvas.width*scale);
+  tmp.height=Math.round(canvas.height*scale);
   const tc=tmp.getContext('2d');
   tc.fillStyle='#FFFFFF'; tc.fillRect(0,0,tmp.width,tmp.height);
-  tc.drawImage(canvas,0,0);
-  const b64=tmp.toDataURL('image/png').split(',')[1];
+  tc.drawImage(canvas,0,0,tmp.width,tmp.height);
+  const b64=tmp.toDataURL('image/jpeg',0.82).split(',')[1];
 
   /* /api/analyze 서버리스 함수 호출 (API 키는 서버에서 관리) */
   try{
@@ -1550,6 +1822,7 @@ async function analyzeWithAI(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         base64: b64,
+        mediaType: 'image/jpeg',
         problem:{
           text: probTxt,
           question: qTxt,
@@ -1562,7 +1835,7 @@ async function analyzeWithAI(){
     });
     if(!res.ok){
       const e=await res.json().catch(()=>({}));
-      throw new Error(e.error||`서버 오류 (${res.status})`);
+      throw new Error(e.error||`서버 오류 (HTTP ${res.status})`);
     }
     const fb=await res.json();
     _renderAIFb(fbArea,fb);
@@ -1599,6 +1872,153 @@ function _renderAIFb(area,fb){
     h+=`<div class="ai-fb-advice">💡 ${escHtml(fb.advice)}</div>`;
   }
   area.innerHTML=h;
+}
+
+/* ════════════════════════════════════════════
+   직접 쓰기 모달 (스크롤 영역 내부)
+   ════════════════════════════════════════════ */
+let _ew = { ctx:null, drawing:false, color:'#212121', erase:false, size:3,
+            lastX:0, lastY:0, hasContent:false };
+
+function openEssayWrite(){
+  const sa = document.getElementById('sa');
+  if(!sa || document.getElementById('ew-modal')) return;
+  sa.classList.add('locked');
+
+  const modal = document.createElement('div');
+  modal.className='ew-overlay'; modal.id='ew-modal';
+  modal.innerHTML=`
+    <div class="ew-header">
+      <span class="ew-title">✍️ 풀이 직접 쓰기</span>
+      <button class="scr-tool" onclick="ewClear()" style="margin-right:6px">전체 지우기</button>
+      <button style="width:30px;height:30px;border-radius:50%;border:none;background:var(--gEE);font-size:15px;cursor:pointer;color:var(--g55)" onclick="closeEssayWrite()">✕</button>
+    </div>
+    <div class="ew-canvas-wrap" id="ew-wrap"><canvas id="ew-canvas"></canvas></div>
+    <div class="ew-toolbar">
+      <button class="scr-col active" id="ew-c0" style="background:#212121" onclick="ewColor('#212121',0)"></button>
+      <button class="scr-col" id="ew-c1" style="background:#1677FF" onclick="ewColor('#1677FF',1)"></button>
+      <button class="scr-col" id="ew-c2" style="background:#FB1A18" onclick="ewColor('#FB1A18',2)"></button>
+      <button class="scr-tool" id="ew-erase" onclick="ewToggleErase()">지우개</button>
+      <div style="flex:1"></div>
+      <button class="scr-sz active" id="ew-sm" onclick="ewSize(3,'sm')">S</button>
+      <button class="scr-sz" id="ew-md" onclick="ewSize(6,'md')">M</button>
+      <button class="scr-sz" id="ew-lg" onclick="ewSize(10,'lg')">L</button>
+    </div>
+    <div class="ew-footer">
+      <button class="ew-btn out" onclick="closeEssayWrite()">취소</button>
+      <button class="ew-btn pri" id="ew-submit-btn" onclick="submitEssayWrite()">✨ AI 채점 받기</button>
+    </div>`;
+  sa.appendChild(modal);
+
+  requestAnimationFrame(()=>{
+    const wrap=document.getElementById('ew-wrap');
+    const canvas=document.getElementById('ew-canvas');
+    if(!wrap||!canvas) return;
+    canvas.width=wrap.offsetWidth; canvas.height=wrap.offsetHeight;
+    _ew.ctx=canvas.getContext('2d');
+    _ew.color='#212121'; _ew.erase=false; _ew.size=3; _ew.hasContent=false;
+    _ewApplyStyle();
+    // 격자 배경
+    const ctx=_ew.ctx;
+    ctx.save(); ctx.strokeStyle='#E8EEF7'; ctx.lineWidth=0.5;
+    for(let y=28;y<canvas.height;y+=28){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke(); }
+    ctx.restore();
+
+    canvas.addEventListener('mousedown',_ewStart);
+    canvas.addEventListener('mousemove',_ewMove);
+    canvas.addEventListener('mouseup',_ewEnd);
+    canvas.addEventListener('mouseleave',_ewEnd);
+    canvas.addEventListener('touchstart',_ewTStart,{passive:false});
+    canvas.addEventListener('touchmove',_ewTMove,{passive:false});
+    canvas.addEventListener('touchend',_ewEnd);
+  });
+}
+
+function closeEssayWrite(){
+  const m=document.getElementById('ew-modal'); if(m) m.remove();
+  const sa=document.getElementById('sa'); if(sa) sa.classList.remove('locked');
+  _ew.ctx=null; _ew.drawing=false;
+}
+
+function ewClear(){
+  const canvas=document.getElementById('ew-canvas');
+  if(!canvas||!_ew.ctx) return;
+  _ew.ctx.clearRect(0,0,canvas.width,canvas.height);
+  _ew.hasContent=false;
+  const ctx=_ew.ctx;
+  ctx.save(); ctx.strokeStyle='#E8EEF7'; ctx.lineWidth=0.5;
+  for(let y=28;y<canvas.height;y+=28){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke(); }
+  ctx.restore();
+}
+
+function ewColor(col,idx){
+  _ew.color=col; _ew.erase=false;
+  for(let i=0;i<3;i++){ const b=document.getElementById('ew-c'+i); if(b) b.classList.toggle('active',i===idx); }
+  const eb=document.getElementById('ew-erase'); if(eb) eb.classList.remove('active');
+  _ewApplyStyle();
+}
+function ewToggleErase(){
+  _ew.erase=!_ew.erase;
+  const eb=document.getElementById('ew-erase'); if(eb) eb.classList.toggle('active',_ew.erase);
+  _ewApplyStyle();
+}
+function ewSize(sz,key){
+  _ew.size=sz;
+  ['sm','md','lg'].forEach(k=>{ const b=document.getElementById('ew-'+k); if(b) b.classList.toggle('active',k===key); });
+  _ewApplyStyle();
+}
+function _ewApplyStyle(){
+  if(!_ew.ctx) return;
+  _ew.ctx.strokeStyle=_ew.erase?'#FAFBFF':_ew.color;
+  _ew.ctx.lineWidth=_ew.erase?_ew.size*5:_ew.size;
+  _ew.ctx.lineCap='round'; _ew.ctx.lineJoin='round';
+  _ew.ctx.globalCompositeOperation=_ew.erase?'destination-out':'source-over';
+}
+function _ewPos(e,c){ const r=c.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; }
+function _ewStart(e){ _ew.drawing=true; _ew.hasContent=true; const {x,y}=_ewPos(e,e.currentTarget); _ew.lastX=x; _ew.lastY=y; _ew.ctx.beginPath(); _ew.ctx.arc(x,y,_ew.ctx.lineWidth/2,0,Math.PI*2); _ew.ctx.fill(); }
+function _ewMove(e){ if(!_ew.drawing) return; const {x,y}=_ewPos(e,e.currentTarget); _ew.ctx.beginPath(); _ew.ctx.moveTo(_ew.lastX,_ew.lastY); _ew.ctx.lineTo(x,y); _ew.ctx.stroke(); _ew.lastX=x; _ew.lastY=y; }
+function _ewEnd(){ _ew.drawing=false; }
+function _ewTStart(e){ e.preventDefault(); if(!e.touches[0]) return; _ew.drawing=true; _ew.hasContent=true; const c=e.currentTarget,r=c.getBoundingClientRect(); _ew.lastX=e.touches[0].clientX-r.left; _ew.lastY=e.touches[0].clientY-r.top; _ew.ctx.beginPath(); _ew.ctx.arc(_ew.lastX,_ew.lastY,_ew.ctx.lineWidth/2,0,Math.PI*2); _ew.ctx.fill(); }
+function _ewTMove(e){ e.preventDefault(); if(!_ew.drawing||!e.touches[0]) return; const c=e.currentTarget,r=c.getBoundingClientRect(); const x=e.touches[0].clientX-r.left,y=e.touches[0].clientY-r.top; _ew.ctx.beginPath(); _ew.ctx.moveTo(_ew.lastX,_ew.lastY); _ew.ctx.lineTo(x,y); _ew.ctx.stroke(); _ew.lastX=x; _ew.lastY=y; }
+
+async function submitEssayWrite(){
+  const canvas=document.getElementById('ew-canvas');
+  const btn=document.getElementById('ew-submit-btn');
+  if(!canvas) return;
+  if(!_ew.hasContent){ alert('풀이를 먼저 써주세요!'); return; }
+
+  if(btn){ btn.disabled=true; btn.textContent='채점 중...'; }
+
+  const tmp=document.createElement('canvas');
+  const MAX=800, scale=Math.min(1,MAX/Math.max(canvas.width,canvas.height));
+  tmp.width=Math.round(canvas.width*scale); tmp.height=Math.round(canvas.height*scale);
+  const tc=tmp.getContext('2d');
+  tc.fillStyle='#FFFFFF'; tc.fillRect(0,0,tmp.width,tmp.height);
+  tc.drawImage(canvas,0,0,tmp.width,tmp.height);
+  const b64=tmp.toDataURL('image/jpeg',0.82).split(',')[1];
+
+  const p=ST.PS[ST.pi];
+  const bp=p.eq.blankPos!==undefined?p.eq.blankPos:2;
+  const result=p.eq.result!==undefined?p.eq.result:p.eq.ans;
+  const eqFull=bp===0?`${p.eq.ans} ${p.eq.op} ${p.eq.g[1]} = ${result}`:bp===1?`${p.eq.g[0]} ${p.eq.op} ${p.eq.ans} = ${result}`:`${p.eq.g[0]} ${p.eq.op} ${p.eq.g[1]} = ${result}`;
+  const probTxt=p.sh.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+  const qTxt=p.qh.replace(/<[^>]+>/g,'').trim();
+
+  try{
+    const res=await fetch('/api/grade',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ problem:{text:probTxt,question:qTxt,equation:eqFull,answer:String(p.eq.ans)}, base64:b64, mediaType:'image/jpeg' }),
+    });
+    if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.error||`서버 오류 (HTTP ${res.status})`); }
+    ST.essayResult=await res.json();
+    const sc=Number(ST.essayResult.score)||0;
+    if(!ST.step4Tracked){ ST.xp+=sc>=70?5:sc>=50?3:1; if(sc>=70) ST.correct++; else ST.wrong++; ST.step4Tracked=true; }
+  }catch(err){
+    ST.essayResult={score:0,accuracy:0,process:0,expression:0,feedback:`채점 중 오류: ${err.message}`,modelAnswer:eqFull};
+  }finally{
+    closeEssayWrite();
+    ST.doneSteps.push(4); ST.step=5; render();
+  }
 }
 
 render();
