@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>수학 문장제 읽기 앱</title>
+<link href="https://fonts.googleapis.com/css2?family=SUIT:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1677FF;--blue-lt:#E5F2FD;
+  --black:#212121;--g55:#555;--g77:#777;--g99:#999;
+  --gD9:#D9D9D9;--gEE:#EEEEEE;--gF7:#F7F8F9;
+  --red:#FB1A18;--green:#B1E266;--orange:#FFB968;--purple:#E05CDD;
+  --font:'SUIT',sans-serif;
+  --rsm:8px;--rmd:12px;--rlg:16px;--rf:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:var(--gF7);min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.phone{
+  width:375px;height:780px;background:#fff;border-radius:36px;
+  box-shadow:0 24px 64px rgba(0,0,0,.12),0 4px 16px rgba(0,0,0,.06);
+  overflow:hidden;display:flex;flex-direction:column;position:relative;
+}
+@media(max-width:400px){
+  body{padding:0}
+  .phone{width:100%;height:100vh;border-radius:0;box-shadow:none}
+}
+
+/* ── 상단 바 ── */
+.topbar{padding:18px 20px 0;display:flex;align-items:center;gap:10px;flex-shrink:0;background:#fff;z-index:10}
+.back{width:36px;height:36px;border-radius:50%;background:var(--gF7);border:none;font-size:18px;color:var(--g55);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.back:hover{background:var(--gEE)}
+.prog{flex:1}
+.prog-lbl{font-size:12px;font-weight:600;color:var(--g77);text-align:center;margin-bottom:6px}
+.prog-track{height:6px;background:var(--gEE);border-radius:var(--rf);overflow:hidden}
+.prog-fill{height:100%;border-radius:var(--rf);background:var(--blue);transition:width .4s ease}
+.xp{display:flex;align-items:center;gap:4px;background:#FFF8E6;border-radius:var(--rf);padding:6px 10px;flex-shrink:0}
+.xp-star{width:14px;height:14px;background:var(--orange);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.xp span{font-size:13px;font-weight:700;color:var(--black)}
+.dots{display:flex;gap:6px;justify-content:center;padding:12px 20px 0;flex-shrink:0;background:#fff}
+.dot{height:4px;border-radius:var(--rf);transition:all .3s ease}
+.dot.done{background:var(--blue);width:20px}
+.dot.active{background:var(--blue);width:28px;opacity:.4}
+.dot.todo{background:var(--gD9);width:20px}
+
+/* ── 고정 문제 카드 ── */
+.pinned-prob{padding:12px 20px 0;flex-shrink:0;background:#fff}
+.pcrd{background:var(--gF7);border-radius:var(--rlg);padding:14px 16px;border-left:3px solid var(--blue)}
+.psen{font-size:15px;font-weight:400;color:var(--black);line-height:1.8}
+.hb{font-weight:700;color:var(--blue);background:var(--blue-lt);padding:1px 5px;border-radius:4px}
+.hs{font-weight:700;color:var(--red);border:2.5px solid var(--red);border-radius:4px;padding:0 4px;display:inline-block;line-height:1.4}
+.pq{font-size:15px;font-weight:700;color:var(--black);line-height:1.65;margin-top:8px}
+
+/* ── 스크롤 영역 ── */
+.scroll{flex:1;overflow-y:auto;padding:14px 20px 16px}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ── 완료 단계 헤더 ── */
+.done-hd{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--gF7);border-radius:var(--rlg);margin-bottom:8px}
+.done-chip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:var(--rf);background:#EAF3DE;color:#27500A;flex-shrink:0}
+.done-title{font-size:13px;font-weight:500;color:var(--g77);flex:1}
+.done-ck{font-size:14px;color:#4CAF50}
+
+/* ── 현재 단계 카드 ── */
+.cur-card{background:#fff;border:1.5px solid var(--blue);border-radius:var(--rlg);padding:16px;margin-bottom:8px}
+.cur-chip{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--rf);margin-bottom:12px}
+.cur-q{font-size:14px;font-weight:700;color:var(--black);margin-bottom:10px;line-height:1.5}
+
+/* ── 선택지 ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.cb{background:#fff;border:1.5px solid var(--gEE);border-radius:var(--rmd);padding:12px 8px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--black);cursor:pointer;text-align:center;line-height:1.4;transition:all .15s}
+.cb:hover{border-color:var(--blue);background:var(--blue-lt)}
+.cb.sel{border-color:var(--blue);background:var(--blue-lt);color:var(--blue);font-weight:700}
+.cb.ok{border-color:#4CAF50;background:#F1FBF2;color:#1B5E20;font-weight:700;pointer-events:none}
+.cb.ng{border-color:var(--red);background:#FFF0F0;color:var(--red);font-weight:700;pointer-events:none}
+.cb.dim{border-color:var(--gEE);color:var(--g99);background:var(--gF7);pointer-events:none}
+.cb.op{font-size:22px;font-weight:700;padding:14px 8px}
+
+/* ── 인라인 피드백 ── */
+.ifb{border-radius:var(--rmd);padding:11px 13px;font-size:13px;font-weight:500;line-height:1.6;margin-top:8px}
+.ifb-ok{background:#F0FAEA;color:#1B5E20}
+.ifb-ng{background:#FFF0F0;color:#8B0000}
+.ifb-tip{background:var(--blue-lt);color:#0050CC}
+.sub-divider{border:none;border-top:0.5px solid var(--gEE);margin:12px 0}
+
+/* ── 빈칸 식 ── */
+.eqa{background:var(--gF7);border-radius:var(--rlg);padding:16px 12px;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.eqr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.eqg{min-width:48px;height:48px;border-radius:var(--rsm);background:var(--blue-lt);color:var(--blue);border:1.5px solid #C2DCFC;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;padding:0 6px}
+.eqb{min-width:54px;height:48px;border-radius:var(--rsm);background:#fff;border:2px dashed var(--blue);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;padding:0 6px;transition:all .2s}
+.eqb.pulse{animation:pb 1.4s ease-in-out infinite}
+@keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(22,119,255,0)}50%{box-shadow:0 0 0 5px rgba(22,119,255,.13)}}
+.eqb.filled{background:var(--green);border:2px solid #7ABF28;color:#1E5200;animation:none}
+.eqb.err{background:#FFF0F0;border:2px solid var(--red);color:var(--red);animation:shk .32s ease}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.eqop{font-size:20px;font-weight:700;color:var(--g55)}
+.eqeq{font-size:18px;color:var(--g77)}
+.eqhint{font-size:12px;font-weight:500;color:var(--blue)}
+
+/* ── 정답 완성 식 ── */
+.ansa{background:#F0FAEA;border-radius:var(--rlg);padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ansb{min-width:46px;height:46px;background:var(--green);border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#1E5200;padding:0 5px}
+
+/* ── 인라인 버튼 쌍 ── */
+.ibtns{display:flex;gap:8px;margin-top:12px}
+.ib{flex:1;padding:12px 8px;border-radius:var(--rlg);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .15s;text-align:center}
+.ib-pri{background:var(--blue);color:#fff}
+.ib-pri:hover{background:#0E5FCC}
+.ib-out{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.ib-out:hover{background:var(--blue-lt)}
+
+/* ── 하단 버튼 ── */
+.btm{padding:10px 20px 18px;flex-shrink:0;border-top:1px solid var(--gEE);background:#fff}
+.cta{width:100%;padding:15px;border-radius:var(--rlg);font-family:var(--font);font-size:16px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.cpri{background:var(--blue);color:#fff}
+.cpri:hover{background:#0E5FCC}
+.cpri:active{transform:scale(.98)}
+.cout{background:#fff;color:var(--blue);border:1.5px solid var(--blue);margin-top:8px}
+.cout:hover{background:var(--blue-lt)}
+.cdis{background:var(--gEE);color:var(--g99);pointer-events:none}
+
+/* TTS */
+.tts{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--blue-lt);border-radius:var(--rf);padding:7px 14px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;transition:all .15s;margin-top:10px}
+.tts:hover{background:var(--blue-lt)}
+.tts-ic{width:16px;height:16px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.tts-ic svg{fill:#fff}
+
+/* ── 인트로·완료 공통 ── */
+.full{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px;text-align:center;overflow-y:auto}
+.full::-webkit-scrollbar{display:none}
+.iico{width:72px;height:72px;background:var(--blue-lt);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px}
+.it{font-size:24px;font-weight:800;color:var(--black);line-height:1.3;margin-bottom:6px}
+.is{font-size:14px;color:var(--g77);line-height:1.7;margin-bottom:28px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;margin-bottom:24px}
+.sc{background:var(--gF7);border-radius:var(--rmd);padding:12px 6px}
+.sn{font-size:17px;font-weight:800;color:var(--black)}
+.sl{font-size:11px;font-weight:500;color:var(--g99);margin-top:2px}
+.dem{font-size:56px;margin-bottom:14px;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.dt{font-size:24px;font-weight:800;color:var(--black);margin-bottom:6px}
+.ds{font-size:14px;color:var(--g77);line-height:1.7;margin-bottom:20px}
+.wtag{padding:4px 10px;border-radius:var(--rf);font-size:12px;font-weight:600}
+.wbad{background:#FFF3DC;color:#7A4500}
+.wok{background:#F0FAEA;color:#1E5200}
+.wr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+
+/* ── 인트로 학년 그리드 ── */
+.intro-grade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;margin-bottom:8px}
+.intro-grade-btn{
+  background:#fff;border:1.5px solid var(--gEE);border-radius:var(--rlg);
+  padding:14px 6px;cursor:pointer;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:all .18s; font-family:var(--font);
+}
+.intro-grade-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.intro-grade-btn:active{transform:scale(.97)}
+.igdot{width:10px;height:10px;border-radius:50%}
+.ignum{font-size:22px;font-weight:800;color:var(--black)}
+.iglbl{font-size:11px;font-weight:600;color:var(--g77)}
+.igcnt{font-size:10px;color:var(--g99)}
+
+/* ── 학년 선택 화면 ── */
+.grade-scroll{flex:1;overflow-y:auto;padding:16px 20px 20px}
+.grade-scroll::-webkit-scrollbar{display:none}
+.grade-section-title{font-size:12px;font-weight:700;color:var(--g99);letter-spacing:.06em;margin-bottom:10px;margin-top:6px}
+.grade-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.grade-btn{
+  background:#fff;border:1.5px solid var(--gEE);border-radius:var(--rlg);
+  padding:16px 8px;cursor:pointer;text-align:center;transition:all .18s;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-family:var(--font);
+}
+.grade-btn:hover{transform:translateY(-2px)}
+.grade-btn.selected{border-width:2px}
+.grade-btn .gnum{font-size:22px;font-weight:800;color:var(--black)}
+.grade-btn .glbl{font-size:11px;font-weight:600;color:var(--g77)}
+.grade-btn .gcnt{font-size:10px;font-weight:500;color:var(--g99);margin-top:2px}
+.grade-btn .gdot{width:10px;height:10px;border-radius:50%;margin-top:2px}
+.grade-btn.g1:hover,.grade-btn.g1.selected{border-color:#1677FF;background:#E5F2FD}
+.grade-btn.g2:hover,.grade-btn.g2.selected{border-color:#8DC840;background:#F3FDE8}
+.grade-btn.g3:hover,.grade-btn.g3.selected{border-color:#FFB968;background:#FFF5E6}
+.grade-btn.g4:hover,.grade-btn.g4.selected{border-color:#FF7D7C;background:#FFF0F0}
+.grade-btn.g5:hover,.grade-btn.g5.selected{border-color:#4CAF50;background:#F0FAEA}
+.grade-btn.g6:hover,.grade-btn.g6.selected{border-color:#E05CDD;background:#FBE7FB}
+
+/* ── 유형 선택 카드 ── */
+.topic-card{
+  background:var(--gF7);border-radius:var(--rlg);padding:14px 16px;
+  margin-bottom:14px;border-left:3px solid var(--blue);
+}
+.topic-title{font-size:13px;font-weight:700;color:var(--black);margin-bottom:10px}
+.topic-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ttag{
+  font-size:12px;font-weight:600;padding:6px 12px;border-radius:var(--rf);
+  background:#fff;border:1.5px solid var(--gD9);color:var(--g55);
+  cursor:pointer;transition:all .15s;font-family:var(--font);
+}
+.ttag:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt)}
+.ttag.sel-topic{border-width:2px;font-weight:700}
+
+/* ── 반응형 ── */
+@media(min-width:600px){
+  body{padding:24px}
+  .phone{width:420px;height:860px;border-radius:40px}
+  .ignum,.gnum{font-size:26px}
+  .cb{font-size:15px;padding:13px 10px}
+  .psen,.pq{font-size:16px}
+}
+@media(min-width:900px){
+  body{padding:32px}
+  .phone{width:480px;height:900px}
+}
+/* 가로 모드 */
+@media(max-height:500px) and (orientation:landscape){
+  body{padding:0;align-items:flex-start}
+  .phone{width:100%;height:100vh;border-radius:0;box-shadow:none;flex-direction:row;flex-wrap:wrap}
+  .topbar{width:100%;padding:10px 20px 0}
+  .dots{width:100%;padding:8px 20px 0}
+  .pinned-prob{width:45%;height:calc(100vh - 80px);overflow-y:auto;border-right:1px solid var(--gEE);padding:10px 12px 10px}
+  .scroll{width:55%;padding:10px 14px}
+  .btm{width:100%;border-top:1px solid var(--gEE);padding:8px 16px 8px}
+  .cta{padding:12px}
+  .phone.intro-mode,.phone.grade-mode{flex-direction:column}
+}
+@media(max-width:400px){
+  body{padding:0}
+  .phone{width:100%;height:100vh;border-radius:0;box-shadow:none}
+  .intro-grade-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .grade-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+.fi{animation:fi .25s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── 직접 쓰기 스텝 ── */
+.write-input{
+  width:100%;padding:13px 15px;
+  border:1.5px solid var(--gEE);border-radius:var(--rlg);
+  font-family:var(--font);font-size:16px;font-weight:500;color:var(--black);
+  background:#fff;resize:none;outline:none;
+  transition:border-color .15s;line-height:1.5;
+}
+.write-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(22,119,255,.1)}
+.write-input.ok-inp{border-color:#4CAF50;background:#F6FFFE;color:#1B5E20}
+.write-input.ng-inp{border-color:var(--red);background:#FFF5F5}
+.write-hint{font-size:12px;color:var(--g99);margin-top:6px;line-height:1.5}
+.ai-row{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:var(--rmd);background:var(--blue-lt);color:#0050CC;font-size:13px;font-weight:500;margin-top:8px}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:#0050CC;flex-shrink:0;animation:bdot 1s ease-in-out infinite}
+@keyframes bdot{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── 연습장 AI 피드백 영역 ── */
+.ai-fb-area{background:#F0F5FF;border-top:1px solid #C2DCFC;max-height:200px;overflow-y:auto;padding:13px 14px;display:none;flex-shrink:0}
+.ai-fb-area.show{display:block}
+.ai-fb-area::-webkit-scrollbar{display:none}
+.ai-loading{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:#0050CC}
+.ai-loading-dot{width:7px;height:7px;border-radius:50%;background:#0050CC;animation:ai-pulse .9s ease-in-out infinite}
+.ai-loading-dot:nth-child(2){animation-delay:.2s}
+.ai-loading-dot:nth-child(3){animation-delay:.4s}
+@keyframes ai-pulse{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+.ai-fb-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px}
+.ai-fb-row:last-child{margin-bottom:0}
+.ai-fb-icon{font-size:16px;flex-shrink:0;line-height:1.4}
+.ai-fb-txt{font-size:12.5px;font-weight:500;color:#212121;line-height:1.6;flex:1}
+.ai-fb-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:var(--rf);margin-bottom:8px}
+.ai-fb-badge.ok{background:#E6F7E6;color:#1B5E20}
+.ai-fb-badge.ng{background:#FFEBEE;color:#B71C1C}
+.ai-fb-badge.inc{background:#FFF8E1;color:#7A4500}
+.ai-fb-badge.empty{background:var(--gEE);color:var(--g77)}
+.ai-fb-err{background:#FFF3F3;border-radius:var(--rsm);padding:7px 10px;margin:5px 0;font-size:12px;color:#8B0000;border-left:3px solid var(--red);line-height:1.55}
+.ai-fb-advice{background:#E8F4FF;border-radius:var(--rsm);padding:7px 10px;margin-top:5px;font-size:12px;color:#003A7A;border-left:3px solid var(--blue);line-height:1.55}
+/* AI 분석 버튼 */
+.ai-analyze-btn{display:flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--rf);border:1.5px solid var(--blue);background:#fff;color:var(--blue);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;flex-shrink:0}
+.ai-analyze-btn:hover{background:var(--blue-lt)}
+.ai-analyze-btn:disabled{border-color:var(--gD9);color:var(--g99);background:var(--gF7);cursor:not-allowed}
+.ai-analyze-btn .btn-spark{font-size:14px}
+.scratch-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;flex-direction:column;animation:fi .2s ease}
+.scratch-box{margin:14px;flex:1;background:#fff;border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.scratch-header{padding:13px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--gEE);flex-shrink:0}
+.scratch-canvas-wrap{flex:1;position:relative;overflow:hidden;background:#FAFBFF}
+#scratch-canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;touch-action:none}
+.scratch-toolbar{padding:9px 12px;display:flex;align-items:center;gap:7px;border-top:1px solid var(--gEE);background:#fff;flex-shrink:0;flex-wrap:wrap}
+.scr-col{width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .12s;flex-shrink:0}
+.scr-col:hover{transform:scale(1.15)}
+.scr-col.active{border-color:var(--black);transform:scale(1.1)}
+.scr-tool{font-size:12px;font-weight:700;padding:5px 11px;border-radius:var(--rf);border:1.5px solid var(--gEE);background:#fff;color:var(--g55);cursor:pointer;font-family:var(--font);transition:all .12s}
+.scr-tool.active{background:var(--blue-lt);border-color:var(--blue);color:var(--blue)}
+.scr-tool:hover{border-color:var(--blue);color:var(--blue)}
+.scr-size{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.scr-sz{width:22px;height:22px;border-radius:50%;background:var(--gEE);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--g55);transition:all .12s}
+.scr-sz.active{background:var(--blue);color:#fff}
+/* ── 연습장 버튼 ── */
+.scratch-open-btn{width:100%;padding:12px;border-radius:var(--rlg);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;border:1.5px dashed var(--blue);background:var(--blue-lt);color:var(--blue);margin-top:10px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.scratch-open-btn:hover{background:#cce3fd}
+/* ── 직접쓰기 흔들기 ── */
+@keyframes shk-inp{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}60%{transform:translateX(6px)}}
+.write-input.shk{animation:shk-inp .35s ease}
+</style>
+</head>
+<body>
+<div class="phone" id="app"></div>
+<script>
+/* ════════════════════════════════════════════
+   전체 문제 데이터베이스 (1~6학년)
+   각 학년당 5문항, 4개 영역 커버
+   ════════════════════════════════════════════ */
+const ALL_PROBLEMS = {
+
+  /* ─── 1학년 ─── */
+  1:[
+    { id:101, type:'합치기 (덧셈)', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'민준이는 색연필을 <b class="hb">5자루</b> 가지고 있었습니다. 엄마가 <b class="hb">3자루</b>를 <b class="hs">더</b> 사 주셨습니다.',
+      qh:'색연필은 <b class="hs">모두</b> 몇 자루인가요?',
+      what:{c:['전체 색연필 수','남은 색연필 수','엄마 색연필','산 색연필'],a:0,
+        fb_ok:"맞아요! '모두'를 보면 전체 수를 구하는 문제예요.",fb_ng:"'모두 몇 자루인지'는 전체 색연필 수를 묻는 거예요."},
+      nums:{c:['5자루','3자루','8자루','2자루'],a:[0,1],
+        fb_ok:"좋아요! 5자루와 3자루가 맞아요.",fb_ng:"처음 가진 5자루와 엄마가 준 3자루예요."},
+      op:{c:['+','−','×','÷'],a:0,hint:"'더', '모두'는 더하기 신호예요",
+        fb_ok:"맞아요! '더 사 주셨다'는 더하기 상황이에요.",fb_ng:"'더 사 주셨다'는 수가 늘어나는 더하기 상황이에요."},
+      eq:{g:['5','3'],op:'+',ans:'8',c:['6','8','2','15'],
+        fb_ok:"완벽해요! 5 + 3 = 8이에요.",fb_ng:"5와 3을 더하면 8이에요. 다시 골라봐요."},
+      ftip:"'더', '모두', '합치면'이 보이면 두 수를 더하는 상황이에요.",at:'색연필은 모두 8자루입니다.'},
+
+    { id:102, type:'줄어들기 (뺄셈)', tc:'#FB1A18', tb:'#FFF0F0',
+      sh:'접시에 사탕이 <b class="hb">9개</b> 있었습니다. 동생이 <b class="hb">4개</b>를 <b class="hs">먹었습니다</b>.',
+      qh:'사탕은 몇 개 <b class="hs">남았나요</b>?',
+      what:{c:['남은 사탕 수','먹은 사탕 수','전체 사탕 수','접시 수'],a:0,
+        fb_ok:"맞아요! '남았나요'가 보이면 남은 수를 구해요.",fb_ng:"'몇 개 남았나요'는 남은 사탕 수를 묻는 거예요."},
+      nums:{c:['9개','4개','5개','13개'],a:[0,1],
+        fb_ok:"좋아요! 처음 9개와 먹은 4개가 맞아요.",fb_ng:"처음 있던 9개와 동생이 먹은 4개예요."},
+      op:{c:['+','−','×','÷'],a:1,hint:"'먹었다', '남았다'는 빼기 신호예요",
+        fb_ok:"맞아요! '먹었다'는 빼기 상황이에요.",fb_ng:"'먹었다'는 수가 줄어드는 빼기 상황이에요."},
+      eq:{g:['9','4'],op:'−',blankPos:0,result:'5',ans:'9',c:['9','7','8','5'],
+        fb_ok:"완벽해요! □ − 4 = 5, 처음 사탕은 9개예요!",fb_ng:"결과 5에 빼는 수 4를 더하면 □ = 9예요. 다시 골라봐요."},
+      ftip:"처음 수에서 없어진 수를 빼면 남은 수가 나와요.",at:'사탕은 5개 남았습니다.'},
+
+    { id:103, type:'차이 비교', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'지아는 스티커를 <b class="hb">7장</b>, 서준이는 <b class="hb">4장</b> 가지고 있습니다.',
+      qh:'지아는 서준이보다 스티커를 몇 장 <b class="hs">더 많이</b> 가지고 있나요?',
+      what:{c:['지아가 더 많은 수','전체 스티커 수','서준이 스티커','지아 스티커'],a:0,
+        fb_ok:"맞아요! '더 많이'를 보면 두 수의 차이를 구해야 해요.",fb_ng:"'몇 장 더 많이'는 두 수의 차이를 묻는 거예요."},
+      nums:{c:['7장','4장','11장','3장'],a:[0,1],
+        fb_ok:"좋아요! 지아의 7장과 서준이의 4장이 맞아요.",fb_ng:"지아의 7장과 서준이의 4장이에요."},
+      op:{c:['+','−','×','÷'],a:1,hint:"'더 많이'는 큰 수에서 작은 수를 빼요",
+        fb_ok:"맞아요! '더 많이'는 두 수의 차이니까 빼기예요.",fb_ng:"'더 많이'는 더하기가 아니에요. 큰 수에서 작은 수를 빼야 해요."},
+      eq:{g:['7','4'],op:'−',blankPos:1,result:'3',ans:'4',c:['4','3','5','2'],
+        fb_ok:"완벽해요! 7 − □ = 3, 빼는 수는 4예요!",fb_ng:"7 − □ = 3 → □ = 7 − 3 = 4예요. 다시 골라봐요."},
+      ftip:"'더 많이', '차이'가 보이면 큰 수 − 작은 수예요.",at:'지아는 3장 더 많이 가지고 있습니다.'},
+
+    { id:104, type:'10 가르기', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'구슬이 <b class="hb">10개</b> 있습니다. 빨간 구슬이 <b class="hb">6개</b>이고 <b class="hs">나머지</b>는 파란 구슬입니다.',
+      qh:'파란 구슬은 <b class="hs">몇 개</b>인가요?',
+      what:{c:['파란 구슬 수','빨간 구슬 수','전체 구슬 수','없어진 구슬 수'],a:0,
+        fb_ok:"맞아요! 파란 구슬 수를 구하는 문제예요.",fb_ng:"'파란 구슬은 몇 개인가요'가 묻는 건 파란 구슬 수예요."},
+      nums:{c:['10개','6개','4개','16개'],a:[0,1],
+        fb_ok:"좋아요! 전체 10개와 빨간 6개가 맞아요.",fb_ng:"전체 구슬 10개와 빨간 구슬 6개예요."},
+      op:{c:['+','−','×','÷'],a:1,hint:"전체에서 한 부분을 빼면 나머지 부분이 나와요",
+        fb_ok:"맞아요! 전체에서 빨간 구슬을 빼면 파란 구슬 수가 나와요.",fb_ng:"전체 수에서 빨간 구슬을 빼야 파란 구슬을 구할 수 있어요."},
+      eq:{g:['10','6'],op:'−',ans:'4',c:['4','16','6','14'],
+        fb_ok:"완벽해요! 10 − 6 = 4예요.",fb_ng:"10에서 6을 빼면 4예요. 다시 골라봐요."},
+      ftip:"'나머지'가 보이면 전체에서 한 부분을 빼는 상황이에요.",at:'파란 구슬은 4개입니다.'},
+
+    { id:105, type:'규칙 찾기', tc:'#FFB968', tb:'#FFF5E6',
+      sh:'바둑돌이 <b class="hs">흰, 검, 흰, 검</b> 순서로 <b class="hs">반복</b>해서 놓여 있습니다.',
+      qh:'8번째 바둑돌은 무슨 <b class="hs">색</b>인가요?',
+      what:{c:['8번째 색깔','전체 개수','흰 돌 수','검은 돌 수'],a:0,
+        fb_ok:"맞아요! 8번째 바둑돌의 색깔을 구하는 문제예요.",fb_ng:"'8번째 바둑돌은 무슨 색인가요'는 8번째 색깔을 묻는 거예요."},
+      nums:{c:['8번째','2개 반복','흰=홀수','검=짝수'],a:[0,3],
+        fb_ok:"좋아요! 8번째 위치와 짝수=검은색 규칙이 맞아요.",fb_ng:"8번째 위치, 그리고 짝수 번째가 검은색인 규칙을 찾아요."},
+      op:{c:['짝수→검','홀수→검','짝수→흰','홀수→흰'],a:0,hint:"흰·검이 2개씩 반복 → 짝수 번째는 검은색이에요",
+        fb_ok:"맞아요! 짝수 번째는 검은색이에요.",fb_ng:"흰·검이 반복되면 짝수 번째는 검은색, 홀수 번째는 흰색이에요."},
+      eq:{g:['8번째','짝수'],op:'→',ans:'검은색',c:['검은색','흰색','모름','없음'],
+        fb_ok:"완벽해요! 8은 짝수니까 검은색이에요.",fb_ng:"8은 짝수예요. 짝수 번째는 검은색이에요."},
+      ftip:"반복되는 규칙에서 짝수·홀수 번째가 무엇인지 확인해요.",at:'8번째 바둑돌은 검은색입니다.'},
+  ],
+
+  /* ─── 2학년 ─── */
+  2:[
+    { id:201, type:'받아올림 덧셈', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'버스에 어른 <b class="hb">36명</b>과 어린이 <b class="hb">28명</b>이 타고 있습니다.',
+      qh:'버스에 타고 있는 사람은 <b class="hs">모두</b> 몇 명인가요?',
+      what:{c:['전체 사람 수','어른 수','어린이 수','남은 사람 수'],a:0,
+        fb_ok:"맞아요! '모두'를 보면 전체 사람 수를 구해야 해요.",fb_ng:"'모두 몇 명인가요'는 전체 사람 수를 묻는 거예요."},
+      nums:{c:['36명','28명','64명','8명'],a:[0,1],
+        fb_ok:"좋아요! 어른 36명과 어린이 28명이 맞아요.",fb_ng:"문제에 나온 숫자는 어른 36명과 어린이 28명이에요."},
+      op:{c:['+','−','×','÷'],a:0,hint:"두 그룹을 '모두' 합치는 상황 → 더하기예요",
+        fb_ok:"맞아요! 두 그룹을 합치니까 더하기예요.",fb_ng:"어른과 어린이를 합치는 상황이에요. 더하기를 써야 해요."},
+      eq:{g:['36','28'],op:'+',blankPos:1,result:'64',ans:'28',c:['28','18','38','24'],
+        fb_ok:"완벽해요! 36 + □ = 64, 더하는 수는 28이에요!",fb_ng:"36 + □ = 64 → □ = 64 − 36 = 28이에요. 다시 골라봐요."},
+      ftip:"두 그룹을 합칠 때는 더하기를 써요.",at:'버스에는 모두 64명이 타고 있습니다.'},
+
+    { id:202, type:'받아내림 뺄셈', tc:'#FB1A18', tb:'#FFF0F0',
+      sh:'사과가 <b class="hb">53개</b> 있었습니다. 그 중에서 <b class="hb">26개</b>를 <b class="hs">팔았습니다</b>.',
+      qh:'사과는 몇 개 <b class="hs">남았나요</b>?',
+      what:{c:['남은 사과 수','판 사과 수','전체 사과 수','상자 수'],a:0,
+        fb_ok:"맞아요! '남았나요'를 보면 남은 수를 구해야 해요.",fb_ng:"'몇 개 남았나요'는 남은 사과 수를 묻는 거예요."},
+      nums:{c:['53개','26개','27개','79개'],a:[0,1],
+        fb_ok:"좋아요! 처음 53개와 판 26개가 맞아요.",fb_ng:"처음 있던 53개와 판 26개예요."},
+      op:{c:['+','−','×','÷'],a:1,hint:"'팔았다', '남았다'는 빼기 신호예요",
+        fb_ok:"맞아요! '팔았다'는 수가 줄어드는 빼기 상황이에요.",fb_ng:"'팔았다'는 수가 줄어드는 상황이에요. 빼기를 써야 해요."},
+      eq:{g:['53','26'],op:'−',ans:'27',c:['27','79','37','17'],
+        fb_ok:"완벽해요! 53 − 26 = 27이에요.",fb_ng:"53에서 26을 빼면 27이에요. 다시 골라봐요."},
+      ftip:"'팔았다', '썼다', '먹었다'가 보이면 빼기 상황이에요.",at:'사과는 27개 남았습니다.'},
+
+    { id:203, type:'묶음 곱셈', tc:'#FFB968', tb:'#FFF5E6',
+      sh:'한 봉지에 귤이 <b class="hb">4개</b><b class="hs">씩</b> 들어 있습니다. 봉지가 <b class="hb">6개</b> 있습니다.',
+      qh:'귤은 <b class="hs">모두</b> 몇 개인가요?',
+      what:{c:['전체 귤 수','한 봉지 귤 수','봉지 수','남은 귤 수'],a:0,
+        fb_ok:"맞아요! '모두'를 보면 전체 귤 수를 구해야 해요.",fb_ng:"'모두 몇 개인가요'는 전체 귤 수를 묻는 거예요."},
+      nums:{c:['4개','6개','24개','10개'],a:[0,1],
+        fb_ok:"좋아요! 한 봉지에 4개, 봉지가 6개가 맞아요.",fb_ng:"한 봉지의 귤 4개와 봉지 수 6개예요."},
+      op:{c:['+','−','×','÷'],a:2,hint:"'~씩'이 있으면 같은 수 반복 → 곱하기예요",
+        fb_ok:"맞아요! '4개씩'은 같은 수가 반복되는 곱하기 상황이에요.",fb_ng:"'4개씩'은 같은 수 반복이에요. 더하기가 아니라 곱하기예요."},
+      eq:{g:['4','6'],op:'×',blankPos:0,result:'24',ans:'4',c:['4','3','5','6'],
+        fb_ok:"완벽해요! □ × 6 = 24, 한 봉지 귤은 4개예요!",fb_ng:"□ × 6 = 24 → □ = 24 ÷ 6 = 4예요. 다시 골라봐요."},
+      ftip:"'~씩', '~마다'가 보이면 (한 묶음 수) × (묶음 수)예요.",at:'귤은 모두 24개입니다.'},
+
+    { id:204, type:'시각과 시간', tc:'#B1E266', tb:'#F3FDE8',
+      sh:'수업이 오전 <b class="hb">9시 10분</b>에 <b class="hs">시작</b>해서 <b class="hb">40분</b> <b class="hs">동안</b> 진행되었습니다.',
+      qh:'수업이 <b class="hs">끝난 시각</b>은 몇 시 몇 분인가요?',
+      what:{c:['끝난 시각','시작 시각','걸린 시간','남은 시간'],a:0,
+        fb_ok:"맞아요! '끝난 시각'을 구하는 문제예요.",fb_ng:"'끝난 시각은 몇 시 몇 분인가요'는 끝난 시각을 묻는 거예요."},
+      nums:{c:['9시 10분','40분','8시 30분','10시'],a:[0,1],
+        fb_ok:"좋아요! 시작 시각 9시 10분과 걸린 시간 40분이 맞아요.",fb_ng:"시작 시각 9시 10분과 걸린 시간 40분이에요."},
+      op:{c:['+','−','×','÷'],a:0,hint:"'시작해서 ~동안'은 시작 시각 + 걸린 시간이에요",
+        fb_ok:"맞아요! 시작 시각에 걸린 시간을 더하면 끝난 시각이 나와요.",fb_ng:"끝난 시각은 시작 시각에 걸린 시간을 더해야 해요."},
+      eq:{g:['9시 10분','40분'],op:'+',ans:'9시 50분',c:['9시 50분','8시 30분','10시 10분','9시 40분'],
+        fb_ok:"완벽해요! 9시 10분 + 40분 = 9시 50분이에요.",fb_ng:"10분 + 40분 = 50분이에요. 9시 50분을 골라봐요."},
+      ftip:"시간 문제: 시작 시각 + 걸린 시간 = 끝난 시각이에요.",at:'수업은 9시 50분에 끝났습니다.'},
+
+    { id:205, type:'수 배열 규칙', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'수가 <b class="hb">3</b>, <b class="hb">6</b>, <b class="hb">9</b>, <b class="hb">12</b>, □, <b class="hb">18</b> 순서로 <b class="hs">늘어납니다</b>.',
+      qh:'□ 안에 <b class="hs">알맞은 수</b>는 무엇인가요?',
+      what:{c:['□의 값','첫 번째 수','늘어나는 수','마지막 수'],a:0,
+        fb_ok:"맞아요! □ 안에 알맞은 수를 구하는 문제예요.",fb_ng:"'□ 안에 알맞은 수'를 구하는 문제예요."},
+      nums:{c:['3씩 늘어남','12 다음','18 앞','6씩 늘어남'],a:[0,1],
+        fb_ok:"좋아요! 3씩 늘어나는 규칙과 12 다음 위치가 맞아요.",fb_ng:"3씩 늘어나는 규칙, 12 다음 위치를 확인해요."},
+      op:{c:['12+3','12−3','12×3','18−3'],a:0,hint:"3씩 늘어나니까 12에 3을 더하면 돼요",
+        fb_ok:"맞아요! 12에 3을 더하면 다음 수가 나와요.",fb_ng:"3씩 늘어나는 규칙이에요. 12에 3을 더해요."},
+      eq:{g:['12','+3'],op:'=',ans:'15',c:['15','13','14','16'],
+        fb_ok:"완벽해요! 12 + 3 = 15예요.",fb_ng:"12에 3을 더하면 15예요. 다시 골라봐요."},
+      ftip:"수 배열에서 규칙을 찾으면 다음 수를 구할 수 있어요.",at:'□ 안에 알맞은 수는 15입니다.'},
+  ],
+
+  /* ─── 3학년 ─── */
+  3:[
+    { id:301, type:'등분제 나눗셈', tc:'#FFB968', tb:'#FFF5E6',
+      sh:'과자 <b class="hb">48개</b>를 <b class="hb">6명</b>에게 <b class="hs">똑같이 나누어</b> 주려고 합니다.',
+      qh:'한 사람이 받는 과자는 <b class="hs">몇 개</b>인가요?',
+      what:{c:['한 사람 몫','전체 과자 수','사람 수','남은 과자 수'],a:0,
+        fb_ok:"맞아요! 한 사람이 받는 과자 수를 구하는 문제예요.",fb_ng:"'한 사람이 받는 과자'를 구하는 문제예요."},
+      nums:{c:['48개','6명','8개','42개'],a:[0,1],
+        fb_ok:"좋아요! 전체 48개와 사람 수 6명이 맞아요.",fb_ng:"전체 과자 48개와 나눠 줄 사람 수 6명이에요."},
+      op:{c:['+','−','×','÷'],a:3,hint:"'똑같이 나누어'는 나눗셈 신호예요",
+        fb_ok:"맞아요! '똑같이 나누어'는 나눗셈 상황이에요.",fb_ng:"'똑같이 나누어'는 나눗셈을 써야 하는 상황이에요."},
+      eq:{g:['48','6'],op:'÷',blankPos:1,result:'8',ans:'6',c:['6','8','7','5'],
+        fb_ok:"완벽해요! 48 ÷ □ = 8, 나누는 수는 6이에요!",fb_ng:"48 ÷ □ = 8 → □ = 48 ÷ 8 = 6이에요. 다시 골라봐요."},
+      ftip:"'똑같이 나누어', '~명에게'가 보이면 나눗셈 상황이에요.",at:'한 사람이 받는 과자는 8개입니다.'},
+
+    { id:302, type:'포함제 나눗셈', tc:'#FFB968', tb:'#FFF5E6',
+      sh:'색종이 <b class="hb">35장</b>을 <b class="hb">5장</b><b class="hs">씩 묶으려고</b> 합니다.',
+      qh:'묶음이 <b class="hs">몇 개</b> 생기나요?',
+      what:{c:['묶음 수','색종이 전체','한 묶음 수','남은 색종이'],a:0,
+        fb_ok:"맞아요! 묶음이 몇 개인지 구하는 문제예요.",fb_ng:"'묶음이 몇 개 생기나요'는 묶음 수를 묻는 거예요."},
+      nums:{c:['35장','5장씩','7묶음','30장'],a:[0,1],
+        fb_ok:"좋아요! 전체 35장과 한 묶음 5장이 맞아요.",fb_ng:"전체 색종이 35장과 한 묶음의 수 5장이에요."},
+      op:{c:['+','−','×','÷'],a:3,hint:"'~씩 묶으면 몇 묶음' → 나눗셈이에요",
+        fb_ok:"맞아요! '~씩 묶으면 몇 묶음'은 나눗셈 상황이에요.",fb_ng:"'5장씩 묶으면 몇 묶음'은 나눗셈을 써야 해요."},
+      eq:{g:['35','5'],op:'÷',blankPos:0,result:'7',ans:'35',c:['35','30','40','25'],
+        fb_ok:"완벽해요! □ ÷ 5 = 7, 전체 색종이는 35장이에요!",fb_ng:"□ ÷ 5 = 7 → □ = 7 × 5 = 35예요. 다시 골라봐요."},
+      ftip:"'~씩 묶으면 몇 묶음'은 포함제 나눗셈이에요.",at:'묶음은 7개 생깁니다.'},
+
+    { id:303, type:'2단계 혼합계산', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'연필 한 자루 <b class="hb">300원</b>, 지우개 한 개 <b class="hb">150원</b>입니다. 연필 <b class="hb">2자루</b>와 지우개 <b class="hb">1개</b>를 <b class="hs">샀습니다</b>.',
+      qh:'모두 <b class="hs">얼마</b>를 내야 하나요?',
+      what:{c:['전체 금액','연필 가격','지우개 가격','거스름돈'],a:0,
+        fb_ok:"맞아요! 전체 금액을 구하는 문제예요.",fb_ng:"'모두 얼마를 내야 하나요'는 전체 금액을 묻는 거예요."},
+      nums:{c:['300원','2자루','150원','1개'],a:[0,1,2,3],
+        fb_ok:"좋아요! 연필 300원×2자루, 지우개 150원×1개가 맞아요.",fb_ng:"연필 300원, 2자루, 지우개 150원, 1개를 모두 사용해요."},
+      op:{c:['×후+','+만','×만','−'],a:0,hint:"먼저 각각 곱하고, 그 다음 더해요",
+        fb_ok:"맞아요! 각각 계산한 후 더하는 구조예요.",fb_ng:"연필 가격 먼저 계산하고(300×2), 지우개 가격(150×1)을 더해요."},
+      eq:{g:['300×2+150','='],op:'',ans:'750',c:['750','600','450','900'],
+        fb_ok:"완벽해요! 300×2 + 150 = 750원이에요.",fb_ng:"300×2=600, 600+150=750이에요. 다시 골라봐요."},
+      ftip:"두 가지 물건을 살 때는 각각 계산 후 합산해요.",at:'모두 750원을 내야 합니다.'},
+
+    { id:304, type:'분수 기초', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'피자 한 판을 <b class="hb">6조각</b>으로 <b class="hs">똑같이</b> 나눴습니다. 그 중에서 <b class="hb">2조각</b>을 먹었습니다.',
+      qh:'먹은 피자는 전체의 <b class="hs">얼마</b>인지 분수로 나타내세요.',
+      what:{c:['먹은 분수','전체 조각 수','먹은 조각 수','남은 조각 수'],a:0,
+        fb_ok:"맞아요! 먹은 양을 분수로 나타내야 해요.",fb_ng:"'전체의 얼마인지 분수로'는 먹은 분수를 구하는 거예요."},
+      nums:{c:['6조각','2조각','4조각','8조각'],a:[0,1],
+        fb_ok:"좋아요! 전체 6조각과 먹은 2조각이 맞아요.",fb_ng:"전체 6조각과 먹은 2조각이에요."},
+      op:{c:['2/6','6/2','4/6','2/4'],a:0,hint:"분수 = 먹은 조각 수 ÷ 전체 조각 수예요",
+        fb_ok:"맞아요! 먹은 조각/전체 조각 = 2/6이에요.",fb_ng:"분수는 (먹은 수)/(전체 수)로 나타내요. 2/6이에요."},
+      eq:{g:['2','6'],op:'/',ans:'1/3',c:['1/3','1/4','2/6','1/2'],
+        fb_ok:"완벽해요! 2/6 = 1/3이에요.",fb_ng:"2/6을 약분하면 1/3이에요. 다시 골라봐요."},
+      ftip:"분수: (부분) / (전체), '똑같이 나눈' 것을 확인해요.",at:'먹은 피자는 전체의 1/3입니다.'},
+
+    { id:305, type:'막대그래프 읽기', tc:'#4CAF50', tb:'#F0FAEA',
+      sh:'좋아하는 계절 조사 결과 봄 <b class="hb">8명</b>, 여름 <b class="hb">12명</b>, 가을 <b class="hb">10명</b>, 겨울 <b class="hb">6명</b>이 나왔습니다.',
+      qh:'<b class="hs">가장 많은</b> 계절과 <b class="hs">가장 적은</b> 계절의 <b class="hs">차</b>는 몇 명인가요?',
+      what:{c:['두 계절의 차','가장 많은 계절','가장 적은 계절','전체 인원'],a:0,
+        fb_ok:"맞아요! 가장 많은 것과 가장 적은 것의 차를 구해야 해요.",fb_ng:"'차'는 두 수의 차이를 묻는 거예요."},
+      nums:{c:['12명(여름)','6명(겨울)','8명(봄)','10명(가을)'],a:[0,1],
+        fb_ok:"좋아요! 가장 많은 여름 12명과 가장 적은 겨울 6명이 맞아요.",fb_ng:"가장 많은 여름 12명과 가장 적은 겨울 6명을 찾아요."},
+      op:{c:['+','−','×','÷'],a:1,hint:"'차'는 큰 수에서 작은 수를 빼는 거예요",
+        fb_ok:"맞아요! '차'는 빼기로 구해요.",fb_ng:"'차'는 큰 수에서 작은 수를 빼야 해요."},
+      eq:{g:['12','6'],op:'−',ans:'6',c:['6','18','4','8'],
+        fb_ok:"완벽해요! 12 − 6 = 6명이에요.",fb_ng:"12에서 6을 빼면 6이에요. 다시 골라봐요."},
+      ftip:"그래프에서 '차'를 구할 때는 가장 큰 값에서 가장 작은 값을 빼요.",at:'가장 많은 여름과 가장 적은 겨울의 차는 6명입니다.'},
+  ],
+
+  /* ─── 4학년 ─── */
+  4:[
+    { id:401, type:'세 자리 수 곱셈', tc:'#FF7D7C', tb:'#FFF0F0',
+      sh:'한 상자에 사탕이 <b class="hb">125개</b><b class="hs">씩</b> 들어 있습니다. 상자가 <b class="hb">24개</b> 있습니다.',
+      qh:'사탕은 <b class="hs">모두</b> 몇 개인가요?',
+      what:{c:['전체 사탕 수','한 상자 사탕','상자 수','남은 사탕'],a:0,
+        fb_ok:"맞아요! '모두'를 보면 전체 사탕 수를 구해야 해요.",fb_ng:"'모두 몇 개인가요'는 전체 사탕 수를 묻는 거예요."},
+      nums:{c:['125개','24개','3000개','100개'],a:[0,1],
+        fb_ok:"좋아요! 한 상자 125개와 상자 수 24개가 맞아요.",fb_ng:"한 상자의 사탕 125개와 상자 수 24개예요."},
+      op:{c:['+','−','×','÷'],a:2,hint:"'~씩 ~개'는 곱하기 상황이에요",
+        fb_ok:"맞아요! '씩'이 있으면 곱하기 상황이에요.",fb_ng:"'125개씩 24상자'는 곱하기를 써야 해요."},
+      eq:{g:['125','24'],op:'×',blankPos:0,result:'3000',ans:'125',c:['125','100','150','120'],
+        fb_ok:"완벽해요! □ × 24 = 3000, 한 상자 사탕은 125개예요!",fb_ng:"□ × 24 = 3000 → □ = 3000 ÷ 24 = 125예요. 다시 골라봐요."},
+      ftip:"'~씩 ~개'가 보이면 곱하기를 써요.",at:'사탕은 모두 3000개입니다.'},
+
+    { id:402, type:'나머지 있는 나눗셈', tc:'#FF7D7C', tb:'#FFF0F0',
+      sh:'학생 <b class="hb">50명</b>을 <b class="hb">7명</b><b class="hs">씩</b> 모둠으로 나누려고 합니다.',
+      qh:'모둠은 몇 개가 되고, <b class="hs">남는</b> 학생은 몇 명인가요?',
+      what:{c:['모둠 수와 남는 학생','전체 학생 수','모둠당 학생','필요한 모둠'],a:0,
+        fb_ok:"맞아요! 모둠 수와 남는 학생 수를 구하는 문제예요.",fb_ng:"모둠 수와 남는 학생 수를 모두 구해야 해요."},
+      nums:{c:['50명','7명씩','7모둠','1명'],a:[0,1],
+        fb_ok:"좋아요! 전체 50명과 모둠당 7명이 맞아요.",fb_ng:"전체 학생 50명과 한 모둠에 들어갈 7명이에요."},
+      op:{c:['+','−','×','÷'],a:3,hint:"'~씩 나누면 몇 모둠'은 나눗셈이에요",
+        fb_ok:"맞아요! 7명씩 나누면 몇 모둠인지는 나눗셈으로 구해요.",fb_ng:"'7명씩 나누면 몇 모둠'은 나눗셈을 써야 해요."},
+      eq:{g:['50','7'],op:'÷',ans:'7···1',c:['7···1','8','7','6···8'],
+        fb_ok:"완벽해요! 50 ÷ 7 = 7 나머지 1이에요.",fb_ng:"50을 7로 나누면 몫 7, 나머지 1이에요."},
+      ftip:"나머지가 있을 때 '남는'이 나오면 나머지를 구해야 해요.",at:'모둠은 7개, 남는 학생은 1명입니다.'},
+
+    { id:403, type:'분수 대소 비교', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'주스가 두 컵에 담겨 있습니다. 가 컵에는 <b class="hb">3/8</b>, 나 컵에는 <b class="hb">5/8</b>만큼 들어 있습니다.',
+      qh:'어느 컵이 <b class="hs">더 많이</b> 들어 있나요? <b class="hs">얼마나 더</b> 많은가요?',
+      what:{c:['더 많은 컵과 차이','더 많은 컵','두 컵의 합','각 컵의 양'],a:0,
+        fb_ok:"맞아요! 어느 컵이 더 많고, 얼마나 더 많은지 구해야 해요.",fb_ng:"더 많은 컵과 차이를 모두 구해야 해요."},
+      nums:{c:['3/8','5/8','2/8','8/8'],a:[0,1],
+        fb_ok:"좋아요! 가 컵 3/8과 나 컵 5/8이 맞아요.",fb_ng:"가 컵 3/8과 나 컵 5/8이에요."},
+      op:{c:['+','−','×','÷'],a:1,hint:"'얼마나 더'는 큰 분수에서 작은 분수를 빼요",
+        fb_ok:"맞아요! '얼마나 더'는 두 분수의 차이니까 빼기예요.",fb_ng:"'얼마나 더 많은가요'는 빼기로 구해야 해요."},
+      eq:{g:['5/8','3/8'],op:'−',blankPos:1,result:'2/8',ans:'3/8',c:['3/8','1/8','2/8','4/8'],
+        fb_ok:"완벽해요! 5/8 − □ = 2/8, 빼는 분수는 3/8이에요!",fb_ng:"5/8 − □ = 2/8 → □ = 5/8 − 2/8 = 3/8이에요. 다시 골라봐요."},
+      ftip:"같은 분모일 때 '더 많이'는 분자가 큰 쪽, 차이는 분자를 빼요.",at:'나 컵이 2/8만큼 더 많이 들어 있습니다.'},
+
+    { id:404, type:'어림하기', tc:'#4CAF50', tb:'#F0FAEA',
+      sh:'어느 마트의 하루 방문객이 <b class="hb">3847명</b>입니다.',
+      qh:'방문객 수를 <b class="hs">반올림</b>하여 <b class="hs">천의 자리</b>까지 나타내면 <b class="hs">약</b> 몇 명인가요?',
+      what:{c:['반올림한 방문객 수','정확한 방문객 수','백의 자리 수','천의 자리 수'],a:0,
+        fb_ok:"맞아요! 반올림한 값을 구하는 문제예요.",fb_ng:"'반올림하여 ~자리까지'는 어림한 수를 구하는 거예요."},
+      nums:{c:['3847명','백의자리:8','천의자리:3','4000명'],a:[0,1],
+        fb_ok:"좋아요! 원래 수 3847과 백의 자리 숫자 8이 맞아요.",fb_ng:"원래 수 3847과 반올림 기준인 백의 자리 숫자 8을 확인해요."},
+      op:{c:['올림','반올림','버림','그대로'],a:1,hint:"백의 자리 숫자 8 ≥ 5이면 올려요",
+        fb_ok:"맞아요! 백의 자리가 8이니까 올림해요.",fb_ng:"반올림: 기준 자리 숫자가 5 이상이면 올려요. 8 ≥ 5이므로 올림이에요."},
+      eq:{g:['3847','반올림'],op:'→',ans:'4000',c:['4000','3000','3800','3900'],
+        fb_ok:"완벽해요! 3847을 천의 자리로 반올림하면 4000이에요.",fb_ng:"백의 자리 8이 5 이상이라 천의 자리가 올라가서 4000이에요."},
+      ftip:"반올림: 구하는 자리 바로 아래가 5 이상이면 올리고, 4 이하면 버려요.",at:'약 4000명입니다.'},
+
+    { id:405, type:'꺾은선그래프', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'월별 평균 기온이 1월 <b class="hb">2°C</b>, 2월 <b class="hb">5°C</b>, 3월 <b class="hb">10°C</b>, 4월 <b class="hb">16°C</b>로 나타났습니다.',
+      qh:'기온이 <b class="hs">가장 많이 오른</b> 달은 언제이고, 몇 도 <b class="hs">올랐나요</b>?',
+      what:{c:['가장 많이 오른 달과 차이','가장 높은 기온','가장 낮은 기온','평균 기온'],a:0,
+        fb_ok:"맞아요! 가장 많이 오른 달과 오른 정도를 구해야 해요.",fb_ng:"어느 달에 가장 많이 올랐고, 얼마나 올랐는지 구해야 해요."},
+      nums:{c:['3→4월 차이:6','1→2월 차이:3','2→3월 차이:5','전체 범위:14'],a:[0,2],
+        fb_ok:"좋아요! 3→4월 6도 상승이 가장 크고, 2→3월도 5도예요.",fb_ng:"인접한 달끼리 차이를 비교해요. 3→4월이 6도로 가장 커요."},
+      op:{c:['16−10','10−5','5−2','16−2'],a:0,hint:"인접한 달의 차이를 각각 비교해요",
+        fb_ok:"맞아요! 4월−3월 = 16−10 = 6도가 가장 커요.",fb_ng:"3월→4월의 차이가 16−10=6도로 가장 크게 올랐어요."},
+      eq:{g:['16','10'],op:'−',blankPos:1,result:'6',ans:'10',c:['10','8','12','6'],
+        fb_ok:"완벽해요! 16 − □ = 6, 빼는 수는 10이에요!",fb_ng:"16 − □ = 6 → □ = 16 − 6 = 10이에요. 다시 골라봐요."},
+      ftip:"꺾은선그래프에서 '가장 많이 오른'은 인접한 값의 차가 가장 큰 것이에요.",at:'4월에 6도 올라 가장 많이 올랐습니다.'},
+  ],
+
+  /* ─── 5학년 ─── */
+  5:[
+    { id:501, type:'분수 곱셈', tc:'#4CAF50', tb:'#F0FAEA',
+      sh:'주스 한 병의 양은 <b class="hb">3/4 L</b>입니다. 이런 주스 병이 <b class="hb">4개</b> 있습니다.',
+      qh:'주스는 <b class="hs">모두</b> 몇 L인가요?',
+      what:{c:['전체 주스 양','한 병의 양','병 수','남은 주스'],a:0,
+        fb_ok:"맞아요! '모두'를 보면 전체 주스 양을 구해야 해요.",fb_ng:"'모두 몇 L인가요'는 전체 주스 양을 묻는 거예요."},
+      nums:{c:['3/4 L','4개','3 L','1 L'],a:[0,1],
+        fb_ok:"좋아요! 한 병 3/4 L와 병 수 4개가 맞아요.",fb_ng:"한 병의 양 3/4 L와 병 수 4개예요."},
+      op:{c:['+','−','×','÷'],a:2,hint:"'~씩 ~개'는 분수도 곱하기예요",
+        fb_ok:"맞아요! '3/4 L씩 4병'은 곱하기 상황이에요.",fb_ng:"'3/4씩 4병'은 같은 양이 반복되는 곱하기 상황이에요."},
+      eq:{g:['3/4','4'],op:'×',blankPos:1,result:'3',ans:'4',c:['4','3','2','6'],
+        fb_ok:"완벽해요! 3/4 × □ = 3, 병 수는 4예요!",fb_ng:"3/4 × □ = 3 → □ = 3 ÷ (3/4) = 4예요. 다시 골라봐요."},
+      ftip:"분수 × 자연수: 분자에 자연수를 곱해요.",at:'주스는 모두 3 L입니다.'},
+
+    { id:502, type:'백분율', tc:'#4CAF50', tb:'#F0FAEA',
+      sh:'반 학생 <b class="hb">25명</b> 중 <b class="hb">16명</b>이 안경을 씁니다.',
+      qh:'안경을 쓰는 학생의 비율은 <b class="hs">몇 %</b>인가요?',
+      what:{c:['안경 쓰는 비율(%)','안경 쓰는 학생 수','전체 학생 수','안경 안 쓰는 학생'],a:0,
+        fb_ok:"맞아요! 안경 쓰는 학생의 비율을 %로 구해야 해요.",fb_ng:"'몇 %인가요'는 백분율을 구하는 거예요."},
+      nums:{c:['25명','16명','9명','41명'],a:[0,1],
+        fb_ok:"좋아요! 전체 25명과 안경 쓰는 16명이 맞아요.",fb_ng:"전체 25명과 안경 쓰는 학생 16명이에요."},
+      op:{c:['16÷25×100','25÷16×100','16+25','25−16'],a:0,hint:"백분율 = 부분 ÷ 전체 × 100이에요",
+        fb_ok:"맞아요! 부분/전체 × 100 = 16/25 × 100이에요.",fb_ng:"백분율은 (부분 ÷ 전체) × 100이에요."},
+      eq:{g:['16÷25','×100'],op:'=',ans:'64%',c:['64%','56%','60%','70%'],
+        fb_ok:"완벽해요! 16/25 × 100 = 64%예요.",fb_ng:"16을 25로 나누면 0.64, × 100 = 64%예요."},
+      ftip:"'~중 ~명'이 보이면 (부분÷전체) × 100 = 백분율이에요.",at:'안경을 쓰는 학생의 비율은 64%입니다.'},
+
+    { id:503, type:'속력 문제', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'자전거를 타고 <b class="hs">시속</b> <b class="hb">12 km</b>로 <b class="hb">2시간 30분</b> <b class="hs">동안</b> 달렸습니다.',
+      qh:'달린 <b class="hs">거리</b>는 몇 km인가요?',
+      what:{c:['달린 거리','속력','달린 시간','남은 거리'],a:0,
+        fb_ok:"맞아요! 달린 거리를 구하는 문제예요.",fb_ng:"'달린 거리는 몇 km인가요'는 거리를 구하는 거예요."},
+      nums:{c:['12 km/h','2.5시간','30 km','2시간'],a:[0,1],
+        fb_ok:"좋아요! 속력 12 km/h와 시간 2.5시간(30분=0.5시간)이 맞아요.",fb_ng:"속력 12 km/h와 2시간 30분(=2.5시간)이에요. 30분=0.5시간을 기억해요."},
+      op:{c:['×','÷','+','−'],a:0,hint:"거리 = 속력 × 시간이에요",
+        fb_ok:"맞아요! 거리 = 속력 × 시간이에요.",fb_ng:"거리를 구하려면 속력 × 시간을 해야 해요."},
+      eq:{g:['12','2.5'],op:'×',blankPos:0,result:'30',ans:'12',c:['12','10','15','20'],
+        fb_ok:"완벽해요! □ × 2.5 = 30, 속력은 시속 12 km예요!",fb_ng:"□ × 2.5 = 30 → □ = 30 ÷ 2.5 = 12예요. 다시 골라봐요."},
+      ftip:"속력 문제: 먼저 시간 단위를 통일해요. 30분 = 0.5시간이에요.",at:'달린 거리는 30 km입니다.'},
+
+    { id:504, type:'정비례', tc:'#4CAF50', tb:'#F0FAEA',
+      sh:'사탕 한 봉지의 값은 <b class="hb">500원</b>입니다. 봉지 수가 <b class="hs">늘어나면</b> 값도 <b class="hs">같은 비율로 늘어납니다</b>.',
+      qh:'봉지 <b class="hb">9개</b>의 값은 <b class="hs">얼마</b>인가요?',
+      what:{c:['9개의 전체 값','한 봉지 값','봉지 수','남은 봉지'],a:0,
+        fb_ok:"맞아요! 9개의 전체 값을 구하는 문제예요.",fb_ng:"봉지 9개의 전체 값을 구하는 거예요."},
+      nums:{c:['500원','9개','4500원','5개'],a:[0,1],
+        fb_ok:"좋아요! 한 봉지 500원과 봉지 수 9개가 맞아요.",fb_ng:"한 봉지 500원과 봉지 수 9개예요."},
+      op:{c:['×','÷','+','−'],a:0,hint:"정비례: 단가 × 개수 = 전체 값이에요",
+        fb_ok:"맞아요! 단가 × 개수로 전체 값을 구해요.",fb_ng:"값이 같은 비율로 늘어나면 단가 × 개수예요."},
+      eq:{g:['500','9'],op:'×',blankPos:1,result:'4500',ans:'9',c:['9','8','10','7'],
+        fb_ok:"완벽해요! 500 × □ = 4500, 봉지 수는 9개예요!",fb_ng:"500 × □ = 4500 → □ = 4500 ÷ 500 = 9예요. 다시 골라봐요."},
+      ftip:"정비례: 한 양이 커질수록 다른 양도 같은 비율로 커져요.",at:'봉지 9개의 값은 4500원입니다.'},
+
+    { id:505, type:'평균 구하기', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'5번의 수학 점수가 <b class="hb">82</b>, <b class="hb">90</b>, <b class="hb">75</b>, <b class="hb">88</b>, <b class="hb">90</b>점입니다.',
+      qh:'<b class="hs">평균</b> 점수는 몇 점인가요?',
+      what:{c:['평균 점수','가장 높은 점수','가장 낮은 점수','총점'],a:0,
+        fb_ok:"맞아요! 평균 점수를 구하는 문제예요.",fb_ng:"'평균 점수는 몇 점인가요'는 평균을 구하는 거예요."},
+      nums:{c:['82,90,75,88,90','5번','425점','85점'],a:[0,1],
+        fb_ok:"좋아요! 5개의 점수와 횟수 5번이 맞아요.",fb_ng:"5개의 점수 전체와 횟수 5번을 사용해요."},
+      op:{c:['합÷횟수','합+횟수','합×횟수','합−횟수'],a:0,hint:"평균 = (전체 합) ÷ (개수)예요",
+        fb_ok:"맞아요! 평균은 합을 개수로 나누어요.",fb_ng:"평균 = 합 ÷ 개수예요."},
+      eq:{g:['425','5'],op:'÷',ans:'85',c:['85','80','90','82'],
+        fb_ok:"완벽해요! 425 ÷ 5 = 85점이에요.",fb_ng:"425를 5로 나누면 85예요. 다시 골라봐요."},
+      ftip:"평균 = (전체 합) ÷ (개수). 먼저 합을 구하고 나누어요.",at:'평균 점수는 85점입니다.'},
+  ],
+
+  /* ─── 6학년 ─── */
+  6:[
+    { id:601, type:'비례배분', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'사탕 <b class="hb">84개</b>를 형과 동생이 <b class="hb">3 : 4</b>의 <b class="hs">비율로</b> 나누어 가지려고 합니다.',
+      qh:'형과 동생은 각각 <b class="hs">몇 개</b>씩 가지게 되나요?',
+      what:{c:['형과 동생 각각의 개수','형의 개수만','동생의 개수만','전체 개수'],a:0,
+        fb_ok:"맞아요! 형과 동생이 각각 얼마를 가지는지 구해야 해요.",fb_ng:"형과 동생이 각각 가지는 개수를 모두 구해야 해요."},
+      nums:{c:['84개','3:4(비율)','3+4=7','12개'],a:[0,1],
+        fb_ok:"좋아요! 전체 84개와 비율 3:4(합=7)가 맞아요.",fb_ng:"전체 84개와 비율 3:4, 비의 합 3+4=7을 사용해요."},
+      op:{c:['84×3/7','84÷7×3과×4','84÷3과÷4','84×3과×4'],a:1,hint:"전체 ÷ 비의 합 × 각 비율로 나눠요",
+        fb_ok:"맞아요! 전체를 비의 합으로 나눈 뒤 각 비율을 곱해요.",fb_ng:"비의 합(3+4=7)로 전체를 나누고, 각 비율(3, 4)을 곱해요."},
+      eq:{g:['84÷7','×3,×4'],op:'=',ans:'36개,48개',c:['36개,48개','28개,56개','42개,42개','24개,60개'],
+        fb_ok:"완벽해요! 형 84×3/7=36개, 동생 84×4/7=48개예요.",fb_ng:"84÷7=12, 형 12×3=36, 동생 12×4=48이에요."},
+      ftip:"비례배분: 전체 ÷ 비의 합 = 1몫, 1몫 × 각 비율 = 각자의 양이에요.",at:'형은 36개, 동생은 48개입니다.'},
+
+    { id:602, type:'비례식', tc:'#E05CDD', tb:'#FBE7FB',
+      sh:'지도에서 <b class="hb">3 cm</b>는 실제 거리 <b class="hb">15 km</b>를 나타냅니다.',
+      qh:'지도에서 <b class="hb">8 cm</b>는 실제로 <b class="hs">몇 km</b>인가요?',
+      what:{c:['실제 거리(km)','지도 거리(cm)','축척','거리 차이'],a:0,
+        fb_ok:"맞아요! 실제 거리를 구하는 문제예요.",fb_ng:"'실제로 몇 km인가요'는 실제 거리를 구하는 거예요."},
+      nums:{c:['3 cm','15 km','8 cm','5km/cm'],a:[0,1,2],
+        fb_ok:"좋아요! 지도 3 cm = 실제 15 km, 지도 8 cm를 모두 사용해요.",fb_ng:"지도 3 cm, 실제 15 km, 구하려는 지도 8 cm를 사용해요."},
+      op:{c:['비례식','덧셈','곱셈','뺄셈'],a:0,hint:"지도:실제 = 지도:실제로 비례식을 세워요",
+        fb_ok:"맞아요! 비례식으로 풀 수 있어요.",fb_ng:"지도 거리와 실제 거리의 비가 같다는 비례식을 써요."},
+      eq:{g:['15÷3','×8'],op:'=',ans:'40',c:['40','24','30','56'],
+        fb_ok:"완벽해요! 15÷3=5, 5×8=40 km예요.",fb_ng:"1 cm당 5 km이므로 8 cm × 5 = 40 km예요."},
+      ftip:"비례식: 같은 비율이면 (알려진 실제 거리 ÷ 지도 거리) × 구하는 지도 거리예요.",at:'지도에서 8 cm는 실제 40 km입니다.'},
+
+    { id:603, type:'원기둥 부피', tc:'#1677FF', tb:'#E5F2FD',
+      sh:'밑면의 <b class="hs">반지름</b>이 <b class="hb">5 cm</b>이고 <b class="hs">높이</b>가 <b class="hb">8 cm</b>인 원기둥 통이 있습니다. (원주율 = <b class="hb">3.14</b>)',
+      qh:'이 통의 <b class="hs">부피</b>는 몇 cm³인가요?',
+      what:{c:['원기둥의 부피','밑면의 넓이','옆면의 넓이','겉넓이'],a:0,
+        fb_ok:"맞아요! 원기둥의 부피를 구하는 문제예요.",fb_ng:"'부피는 몇 cm³인가요'는 부피를 구하는 거예요."},
+      nums:{c:['반지름 5 cm','높이 8 cm','3.14','628 cm³'],a:[0,1,2],
+        fb_ok:"좋아요! 반지름 5, 높이 8, 원주율 3.14를 모두 사용해요.",fb_ng:"반지름 5 cm, 높이 8 cm, 원주율 3.14를 모두 사용해요."},
+      op:{c:['r²×π×h','r×π×h','r²×π','2×r×π×h'],a:0,hint:"원기둥 부피 = 반지름² × 원주율 × 높이예요",
+        fb_ok:"맞아요! 부피 = r² × π × h예요.",fb_ng:"원기둥 부피 = 반지름² × 원주율 × 높이예요."},
+      eq:{g:['5²×3.14','×8'],op:'=',ans:'628',c:['628','314','502','785'],
+        fb_ok:"완벽해요! 25 × 3.14 × 8 = 628 cm³예요.",fb_ng:"5² = 25, 25 × 3.14 = 78.5, 78.5 × 8 = 628이에요."},
+      ftip:"원기둥 부피 = 반지름² × 원주율 × 높이 (r²πh)예요.",at:'이 통의 부피는 628 cm³입니다.'},
+
+    { id:604, type:'평균 역산', tc:'#FF7D7C', tb:'#FFF0F0',
+      sh:'5번의 점수 중 4번은 <b class="hb">82</b>, <b class="hb">90</b>, <b class="hb">75</b>, <b class="hb">88</b>점이고 <b class="hs">평균이 85점</b>이 되려고 합니다.',
+      qh:'마지막 점수는 <b class="hs">몇 점</b>이어야 하나요?',
+      what:{c:['마지막 점수','현재 4번의 합','목표 평균','필요한 합'],a:0,
+        fb_ok:"맞아요! 마지막에 필요한 점수를 구해야 해요.",fb_ng:"'마지막 점수는 몇 점이어야 하나요'는 마지막 점수를 구하는 거예요."},
+      nums:{c:['목표평균 85점','5번','4번 합:335','평균×횟수=425'],a:[0,1,2,3],
+        fb_ok:"좋아요! 목표 평균 85점, 5번, 현재 합 335를 사용해요.",fb_ng:"목표 평균 85점, 횟수 5번, 현재 4번 합(82+90+75+88=335)을 사용해요."},
+      op:{c:['85×5−335','85×5+335','335÷4','85+335'],a:0,hint:"목표 합 − 현재 합 = 마지막 점수예요",
+        fb_ok:"맞아요! 목표 합에서 현재 합을 빼면 마지막 점수가 나와요.",fb_ng:"먼저 목표 합(85×5=425)을 구하고, 현재 합(335)을 빼요."},
+      eq:{g:['85×5','−335'],op:'=',ans:'90',c:['90','85','95','80'],
+        fb_ok:"완벽해요! 85×5=425, 425−335=90점이에요.",fb_ng:"425 − 335 = 90이에요. 다시 골라봐요."},
+      ftip:"평균 역산: 목표 합(평균×횟수) − 현재 합 = 마지막 필요한 값이에요.",at:'마지막 시험에서 90점을 받아야 합니다.'},
+
+    { id:605, type:'띠·원그래프', tc:'#4CAF50', tb:'#F0FAEA',
+      sh:'학생 <b class="hb">200명</b>의 취미 조사에서 운동 <b class="hb">35%</b>, 독서 <b class="hb">25%</b>, 게임 <b class="hb">20%</b>, 기타 <b class="hb">20%</b>로 나타났습니다.',
+      qh:'<b class="hs">운동</b>을 취미로 하는 학생은 <b class="hs">몇 명</b>인가요?',
+      what:{c:['운동 취미 학생 수','전체 학생 수','운동 비율','독서 학생 수'],a:0,
+        fb_ok:"맞아요! 운동 취미인 학생 수를 구해야 해요.",fb_ng:"'운동을 취미로 하는 학생은 몇 명인가요'는 학생 수를 구하는 거예요."},
+      nums:{c:['200명','35%','0.35','70명'],a:[0,1],
+        fb_ok:"좋아요! 전체 200명과 운동 비율 35%가 맞아요.",fb_ng:"전체 학생 200명과 운동 비율 35%(=0.35)를 사용해요."},
+      op:{c:['×','÷','+','−'],a:0,hint:"전체 × 비율 = 그 항목의 수예요",
+        fb_ok:"맞아요! 전체 × 비율로 항목의 수를 구해요.",fb_ng:"전체 학생 수 × 해당 비율 = 해당 학생 수예요."},
+      eq:{g:['200','0.35'],op:'×',blankPos:0,result:'70',ans:'200',c:['200','100','300','150'],
+        fb_ok:"완벽해요! □ × 0.35 = 70, 전체 학생은 200명이에요!",fb_ng:"□ × 0.35 = 70 → □ = 70 ÷ 0.35 = 200이에요. 다시 골라봐요."},
+      ftip:"그래프에서 특정 항목의 수 = 전체 × (비율/100)이에요.",at:'운동을 취미로 하는 학생은 70명입니다.'},
+  ],
+};
+
+/* ════════════════════════════════════════════
+   학년별 메타 정보
+   ════════════════════════════════════════════ */
+const GRADE_INFO = {
+  1:{ color:'#1677FF', bg:'#E5F2FD', label:'1학년', desc:'덧셈·뺄셈 기초, 규칙 찾기' },
+  2:{ color:'#8DC840', bg:'#F3FDE8', label:'2학년', desc:'두 자리 수 연산, 곱셈, 시간' },
+  3:{ color:'#FFB968', bg:'#FFF5E6', label:'3학년', desc:'나눗셈, 분수, 그래프 읽기' },
+  4:{ color:'#FF7D7C', bg:'#FFF0F0', label:'4학년', desc:'큰 수, 나머지, 어림하기' },
+  5:{ color:'#4CAF50', bg:'#F0FAEA', label:'5학년', desc:'분수 연산, 비율, 속력' },
+  6:{ color:'#E05CDD', bg:'#FBE7FB', label:'6학년', desc:'비례, 부피, 평균 역산' },
+};
+
+/* ════════════════════════════════════════════
+   앱 상태
+   ════════════════════════════════════════════ */
+const ST = {
+  screen: 'intro',
+  grade: null,
+  selTopic: null,        // 선택된 유형 (null = 전체)
+  PS: [],
+  pi: 0,
+  xp: 24, correct: 0, wrong: 0, weakTypes: [],
+  step: 1, doneSteps: [], sub: 'start',
+  whatSel: null, numSel: [], opSel: null, eqSel: null,
+  step4Write: '',        // 직접 쓰기 입력값
+  step4Tracked: false,   // 이 문제 채점 여부
+};
+
+function resetSteps(){
+  ST.step=1; ST.doneSteps=[]; ST.sub='start';
+  ST.whatSel=null; ST.numSel=[]; ST.opSel=null; ST.eqSel=null;
+  ST.step4Write=''; ST.step4Tracked=false;
+}
+
+const $a = document.getElementById('app');
+function render(){
+  if     (ST.screen==='intro')        rIntro();
+  else if(ST.screen==='grade-select') rGradeSelect();
+  else if(ST.screen==='problem')      rProblem();
+  else                                 rDone();
+}
+
+/* ════════════════════════════════════════════
+   인트로 화면
+   ════════════════════════════════════════════ */
+function rIntro(){
+  const gradeBtns = [1,2,3,4,5,6].map(g=>{
+    const gi = GRADE_INFO[g];
+    return `<button class="intro-grade-btn" onclick="quickGrade(${g})" style="border-color:${gi.color}20">
+      <div class="igdot" style="background:${gi.color}"></div>
+      <div class="ignum">${g}</div>
+      <div class="iglbl">${gi.label}</div>
+      <div class="igcnt">${ALL_PROBLEMS[g].length}문제</div>
+    </button>`;
+  }).join('');
+
+  $a.innerHTML=`
+  <div class="full fi intro-mode">
+    <div class="iico">📖</div>
+    <div class="it">수학 문장제<br>읽기 훈련</div>
+    <div class="is">문제를 읽고, 핵심을 찾고,<br>식을 완성하는 연습이에요</div>
+    <div class="intro-grade-grid">${gradeBtns}</div>
+  </div>`;
+}
+/* 인트로에서 학년 바로 탭 → 학년선택 화면으로 */
+function quickGrade(g){ ST.grade=g; ST.screen='grade-select'; render(); }
+function goGradeSelect(){ ST.screen='grade-select'; render(); }
+
+/* ════════════════════════════════════════════
+   학년 선택 화면
+   ════════════════════════════════════════════ */
+function rGradeSelect(){
+  const sel  = ST.grade;
+  const info = sel ? GRADE_INFO[sel] : null;
+
+  const gradeBtns = [1,2,3,4,5,6].map(g=>{
+    const gi = GRADE_INFO[g];
+    const isSel = sel===g;
+    return `<button class="grade-btn g${g} ${isSel?'selected':''}" onclick="selectGrade(${g})">
+      <div class="gdot" style="background:${gi.color}"></div>
+      <div class="gnum">${g}</div>
+      <div class="glbl">${gi.label}</div>
+      <div class="gcnt">${ALL_PROBLEMS[g].length}문제</div>
+    </button>`;
+  }).join('');
+
+  /* 유형 선택 카드 — 학년 선택 시에만 표시 */
+  let topicHtml = '';
+  if(info){
+    const topics = ALL_PROBLEMS[sel].map(p=>p.type);
+    const selTopic = ST.selTopic; // null = 전체
+    const tagBtns = [
+      `<button class="ttag ${selTopic===null?'sel-topic':''}" style="${selTopic===null?`border-color:${info.color};color:${info.color};background:${info.bg}`:''}" onclick="selTopic(null)">전체</button>`,
+      ...topics.map(t=>`<button class="ttag ${selTopic===t?'sel-topic':''}" style="${selTopic===t?`border-color:${info.color};color:${info.color};background:${info.bg}`:''}\" onclick="selTopic('${t.replace(/'/g,'\\\'')}')">${t}</button>`)
+    ].join('');
+    topicHtml=`
+    <div class="topic-card" style="border-left-color:${info.color}">
+      <div class="topic-title" style="color:${info.color}">${info.label} 학습 내용 선택</div>
+      <div class="topic-tags">${tagBtns}</div>
+    </div>`;
+  } else {
+    topicHtml=`<div class="topic-card" style="border-left-color:var(--gD9)">
+      <div class="topic-title" style="color:var(--g77)">학년을 선택하면 학습 내용을 고를 수 있어요</div>
+    </div>`;
+  }
+
+  /* 시작 버튼 텍스트 */
+  const topicLabel = ST.selTopic ? ` · ${ST.selTopic}` : '';
+  const startBtn = (sel && info)
+    ? `<button class="cta cpri" onclick="startGrade(${sel})" style="background:${info.color}">${info.label}${topicLabel} 시작하기 →</button>`
+    : `<button class="cta cdis">학년을 골라주세요</button>`;
+
+  $a.innerHTML=`
+  <div class="topbar" style="padding-bottom:0">
+    <button class="back" onclick="goIntro()">←</button>
+    <div style="flex:1;text-align:center;font-size:15px;font-weight:700;color:var(--black)">학년 선택</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="grade-scroll fi">
+    <div class="grade-section-title" style="margin-top:14px">학년을 골라요</div>
+    <div class="grade-grid">${gradeBtns}</div>
+    ${topicHtml}
+  </div>
+  <div class="btm">${startBtn}</div>`;
+}
+
+function selectGrade(g){
+  ST.grade=g;
+  ST.selTopic=null; // 학년 바꾸면 유형 선택 초기화
+  render();
+}
+function selTopic(t){
+  ST.selTopic = t;
+  render();
+}
+
+function startGrade(g){
+  ST.grade=g;
+  const all = ALL_PROBLEMS[g];
+  // 유형이 선택됐으면 해당 유형만, 아니면 전체
+  ST.PS = ST.selTopic
+    ? all.filter(p=>p.type===ST.selTopic)
+    : [...all];
+  if(ST.PS.length===0) ST.PS=[...all]; // 혹시 비면 전체로
+  ST.pi=0; ST.xp=24; ST.correct=0; ST.wrong=0; ST.weakTypes=[];
+  resetSteps();
+  ST.screen='problem';
+  render();
+}
+
+/* ════════════════════════════════════════════
+   문제 화면 (v4 엔진 그대로)
+   ════════════════════════════════════════════ */
+function rProblem(){
+  const p    = ST.PS[ST.pi];
+  const gi   = GRADE_INFO[ST.grade];
+  const prog = ((ST.pi*5 + ST.step) / (ST.PS.length*5)) * 100;
+
+  const dots = [1,2,3,4,5].map(n=>{
+    if(ST.doneSteps.includes(n)) return `<div class="dot done"></div>`;
+    if(n===ST.step)              return `<div class="dot active"></div>`;
+    return                              `<div class="dot todo"></div>`;
+  }).join('');
+
+  let doneHtml='';
+  ST.doneSteps.forEach(n=>{
+    const labels=['','문제 읽기','핵심 찾기','연산 고르기','식 완성하기','읽기 피드백'];
+    const chipStyle=n===1?`background:${p.tb};color:${p.tc}`:'background:#EAF3DE;color:#27500A';
+    doneHtml+=`<div class="done-hd">
+      <span class="done-chip" style="${chipStyle}">${n}단계 ✓</span>
+      <span class="done-title">${labels[n]}</span>
+      <span class="done-ck">✓</span>
+    </div>`;
+  });
+
+  const curContent = buildCurrentStep(p);
+  const btn = buildBottomBtn(p);
+
+  $a.innerHTML=`
+  <div class="topbar">
+    <button class="back" onclick="goBack()">←</button>
+    <div class="prog">
+      <div class="prog-lbl">${gi.label} · ${ST.pi+1} / ${ST.PS.length} 문제</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${prog}%;background:${gi.color}"></div></div>
+    </div>
+    <div class="xp"><div class="xp-star"></div><span>${ST.xp}</span></div>
+  </div>
+  <div class="dots">${dots}</div>
+  <div class="pinned-prob">
+    <div class="pcrd" style="border-left-color:${gi.color}">
+      <div class="psen">${p.sh}</div>
+      <div class="pq">${p.qh}</div>
+    </div>
+  </div>
+  <div class="scroll" id="sa">
+    ${doneHtml}
+    <div id="cur-step">${curContent}</div>
+  </div>
+  <div class="btm fi">${btn}</div>`;
+
+  setTimeout(()=>{
+    const el=document.getElementById('cur-step');
+    if(el) el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    const inp=document.getElementById('write4-inp');
+    if(inp && document.activeElement!==inp) inp.focus();
+  },80);
+}
+
+/* ── 단계 빌더 ── */
+function buildCurrentStep(p){
+  const s=ST.step;
+  if(s===1) return buildStep1(p);
+  if(s===2) return buildStep2(p);
+  if(s===3) return buildStep3(p);
+  if(s===4) return buildStep4(p);
+  if(s===5) return buildStep5(p);
+  return '';
+}
+
+function buildStep1(p){
+  const gi=GRADE_INFO[ST.grade];
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:${p.tb};color:${p.tc}">1단계 · 문제 읽기</span>
+    <div style="font-size:14px;color:var(--g77);line-height:1.6">
+      위 문제를 천천히 읽어보세요.<br>빨간 박스 단어에 주목해요.
+    </div>
+    <button class="tts" onclick="tts(${p.id})">
+      <div class="tts-ic"><svg width="8" height="10" viewBox="0 0 8 10"><path d="M0 0L8 5L0 10V0Z"/></svg></div>
+      문제 듣기
+    </button>
+  </div>`;
+}
+
+function buildStep2(p){
+  const sub=ST.sub;
+  const whatBtns=p.what.c.map((c,i)=>{
+    let cls='cb';
+    const locked=sub==='what_fb'||sub==='nums'||sub==='nums_fb';
+    if(locked) cls+=i===p.what.a?' ok':' dim';
+    else if(ST.whatSel===i) cls+=' sel';
+    const oc=locked?'':` onclick="selWhat(${i})"`;
+    return `<button class="${cls}"${oc}>${c}</button>`;
+  }).join('');
+  const whatFb=(sub==='what_fb'||sub==='nums'||sub==='nums_fb')?`
+    <div class="ifb ${ST.whatSel===p.what.a?'ifb-ok':'ifb-ng'}">
+      ${ST.whatSel===p.what.a?p.what.fb_ok:p.what.fb_ng}</div>`:'';
+  let numSection='';
+  if(sub==='nums'||sub==='nums_fb'){
+    const numBtns=p.nums.c.map((c,i)=>{
+      let cls='cb';
+      const locked=sub==='nums_fb';
+      if(locked) cls+=p.nums.a.includes(i)?' ok':' dim';
+      else if(ST.numSel.includes(i)) cls+=' sel';
+      const oc=locked?'':` onclick="togNum(${i})"`;
+      return `<button class="${cls}"${oc}>${c}</button>`;
+    }).join('');
+    const sortedSel=[...ST.numSel].sort().join();
+    const sortedAns=[...p.nums.a].sort().join();
+    const numFb=sub==='nums_fb'?`
+      <div class="ifb ${sortedSel===sortedAns?'ifb-ok':'ifb-ng'}">
+        ${sortedSel===sortedAns?p.nums.fb_ok:p.nums.fb_ng}</div>`:'';
+    numSection=`<hr class="sub-divider">
+      <div class="cur-q fi">문제에 나온 숫자를 골라요</div>
+      <div class="g2">${numBtns}</div>${numFb}`;
+  }
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:#F3F3F3;color:#555">2단계 · 핵심 찾기</span>
+    <div class="cur-q">무엇을 구하는 문제인가요?</div>
+    <div class="g2">${whatBtns}</div>${whatFb}${numSection}
+  </div>`;
+}
+
+function buildStep3(p){
+  const sub=ST.sub;
+  const opBtns=p.op.c.map((c,i)=>{
+    let cls='cb op';
+    const locked=sub==='op_fb';
+    if(locked) cls+=i===p.op.a?' ok':' dim';
+    else if(ST.opSel===i) cls+=' sel';
+    const oc=locked?'':` onclick="selOp(${i})"`;
+    return `<button class="${cls}"${oc}>${c}</button>`;
+  }).join('');
+  const opFb=sub==='op_fb'?`
+    <div class="ifb ${ST.opSel===p.op.a?'ifb-ok':'ifb-ng'}">
+      ${ST.opSel===p.op.a?p.op.fb_ok:p.op.fb_ng}</div>`:'';
+  const hintHtml=sub==='start'?`<div class="ifb ifb-tip" style="margin-bottom:4px">${p.op.hint}</div>`:'';
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:#F3F3F3;color:#555">3단계 · 연산 고르기</span>
+    <div class="cur-q">어떤 계산이 필요한가요?</div>
+    ${hintHtml}<div class="g2">${opBtns}</div>${opFb}
+  </div>`;
+}
+
+function buildStep4(p){
+  const sub=ST.sub;
+  const bp = p.eq.blankPos !== undefined ? p.eq.blankPos : 2;
+  const result = p.eq.result !== undefined ? p.eq.result : p.eq.ans;
+
+  /* ── 빈칸 상태 계산 ── */
+  let blankCls='eqb pulse', blankTxt='?';
+  const isCorrect = sub==='write_correct'||sub==='eq_correct';
+  if(isCorrect){ blankCls='eqb filled'; blankTxt=p.eq.ans; }
+  else if(sub==='eq_wrong_fb'){ blankCls='eqb err'; blankTxt=ST.eqSel; }
+  else if(ST.eqSel&&sub==='choice'){ blankCls='eqb filled'; blankTxt=ST.eqSel; }
+
+  /* ── 식 행 구성 (blankPos 기반) ── */
+  function eqRow(bCls,bTxt){
+    if(bp===0) return `
+      <div class="${bCls}">${bTxt}</div>
+      <span class="eqop">${p.eq.op}</span>
+      <div class="eqg">${p.eq.g[1]}</div>
+      <span class="eqeq">=</span>
+      <div class="eqg">${result}</div>`;
+    if(bp===1) return `
+      <div class="eqg">${p.eq.g[0]}</div>
+      <span class="eqop">${p.eq.op}</span>
+      <div class="${bCls}">${bTxt}</div>
+      <span class="eqeq">=</span>
+      <div class="eqg">${result}</div>`;
+    return `
+      <div class="eqg">${p.eq.g[0]}</div>
+      <span class="eqop">${p.eq.op}</span>
+      <div class="eqg">${p.eq.g[1]}</div>
+      <span class="eqeq">=</span>
+      <div class="${bCls}">${bTxt}</div>`;
+  }
+
+  const hintLabel = bp===0?'↑ 빈칸(앞)에 들어갈 수를 구해요':
+                    bp===1?'↑ 빈칸(가운데)에 들어갈 수를 구해요':
+                           '↑ 빈칸에 들어갈 정답을 구해요';
+
+  function eqArea(bCls,bTxt,hint){
+    return `<div class="eqa">
+      <div class="eqr">${eqRow(bCls,bTxt)}</div>
+      <div class="eqhint">${hint}</div>
+    </div>`;
+  }
+
+  /* ═══════════════════════════════
+     1) 직접 쓰기 모드 (write)
+  ═══════════════════════════════ */
+  if(sub==='write'){
+    return `<div class="cur-card fi">
+      <span class="cur-chip" style="background:#F3F3F3;color:#555">4단계 · 식 완성하기</span>
+      <div class="cur-q">빈칸에 알맞은 수를 직접 써보세요 ✏️</div>
+      ${eqArea('eqb pulse','?','↑ 빈칸에 들어갈 값을 아래에 입력해요')}
+      <input id="write4-inp" class="write-input" type="text" inputmode="decimal"
+        placeholder="정답을 입력해요..."
+        value="${escHtml(ST.step4Write)}"
+        oninput="ST.step4Write=this.value"
+        onkeydown="if(event.key==='Enter')confirmWrite()">
+      <div class="write-hint">숫자, 단위 포함해서 써요 · 예: 9, 28, 64%</div>
+    </div>`;
+  }
+
+  /* ═══════════════════════════════
+     2) 직접 쓰기 오답 피드백
+  ═══════════════════════════════ */
+  if(sub==='write_wrong_fb'){
+    return `<div class="cur-card fi">
+      <span class="cur-chip" style="background:#F3F3F3;color:#555">4단계 · 식 완성하기</span>
+      <div class="cur-q">빈칸에 알맞은 수를 직접 써보세요 ✏️</div>
+      ${eqArea('eqb err',ST.step4Write||'?','↑ 다시 확인해봐요')}
+      <input class="write-input ng-inp" type="text" value="${escHtml(ST.step4Write)}" disabled>
+      <div class="ifb ifb-ng" style="margin-top:8px">${p.eq.fb_ng}</div>
+      <div class="ifb ifb-tip" style="margin-top:6px">${p.ftip}</div>
+      <div class="ibtns">
+        <button class="ib ib-pri" onclick="retryWrite()">다시 써보기</button>
+        <button class="ib ib-out" onclick="showChoice()">선택지로 풀기</button>
+      </div>
+    </div>`;
+  }
+
+  /* ═══════════════════════════════
+     3) 직접 쓰기 정답
+  ═══════════════════════════════ */
+  if(sub==='write_correct'){
+    return `<div class="cur-card fi">
+      <span class="cur-chip" style="background:#F3F3F3;color:#555">4단계 · 식 완성하기</span>
+      <div class="cur-q">빈칸을 채워 식을 완성해요</div>
+      ${eqArea('eqb filled',p.eq.ans,'↑ 정답이에요!')}
+      <div class="ifb ifb-ok">${p.eq.fb_ok}</div>
+    </div>`;
+  }
+
+  /* ═══════════════════════════════
+     4) 선택지 모드 (choice / 기존 start)
+  ═══════════════════════════════ */
+  const eqBtns=p.eq.c.map(c=>{
+    let cls='cb';
+    if(sub==='eq_wrong_fb') cls+=c===p.eq.ans?' ok':(c===ST.eqSel?' ng':' dim');
+    else if(sub==='eq_correct') cls+=c===p.eq.ans?' ok dim':' dim';
+    else if(ST.eqSel===c) cls+=' sel';
+    const oc=(sub==='eq_wrong_fb'||sub==='eq_correct')?'':` onclick="selEq('${escJs(c)}')"`;
+    return `<button class="${cls}"${oc}>${c}</button>`;
+  }).join('');
+
+  const wrongFb=sub==='eq_wrong_fb'?`
+    <div class="ifb ifb-ng">${p.eq.fb_ng}</div>
+    <div class="ifb ifb-tip" style="margin-top:6px">${p.ftip}</div>
+    <div class="ibtns">
+      <button class="ib ib-pri" onclick="retryEq()">다시 풀기</button>
+      <button class="ib ib-out" onclick="skipToStep5()">다음으로</button>
+    </div>`:'';
+
+  const choiceHint = sub==='choice'?`<div class="ifb ifb-tip" style="margin-bottom:8px;font-size:12px">직접 쓰기가 어려웠나요? 아래 선택지에서 골라봐요 👇</div>`:'';
+
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:#F3F3F3;color:#555">4단계 · 식 완성하기</span>
+    <div class="cur-q">빈칸을 채워 식을 완성해요</div>
+    ${eqArea(blankCls,blankTxt,hintLabel)}
+    ${choiceHint}<div class="g2">${eqBtns}</div>${wrongFb}
+  </div>`;
+}
+
+function buildStep5(p){
+  const gi=GRADE_INFO[ST.grade];
+  const result = p.eq.result !== undefined ? p.eq.result : p.eq.ans;
+  return `<div class="cur-card fi">
+    <span class="cur-chip" style="background:#F3F3F3;color:#555">5단계 · 읽기 피드백</span>
+    <div class="ansa">
+      <div class="ansb">${p.eq.g[0]}</div>
+      <span class="eqop" style="font-size:18px;color:var(--g55)">${p.eq.op}</span>
+      <div class="ansb">${p.eq.g[1]}</div>
+      <span class="eqeq" style="font-size:18px">=</span>
+      <div class="ansb">${result}</div>
+    </div>
+    <div class="ifb ifb-ok" style="margin-bottom:8px">
+      <strong>잘 풀었어요!</strong><br>${p.eq.fb_ok}
+    </div>
+    <div class="ifb ifb-tip">
+      <strong>이 문제의 읽기 신호</strong><br>${p.ftip}
+    </div>
+    <button class="scratch-open-btn" onclick="openScratch()">
+      ✏️ 계산 연습장 열기
+    </button>
+  </div>`;
+}
+
+/* ── 하단 버튼 ── */
+function buildBottomBtn(p){
+  const s=ST.step,sub=ST.sub;
+  if(s===1) return `<button class="cta cpri" onclick="ok1()">읽었어요 →</button>`;
+  if(s===2){
+    if(sub==='start') return ST.whatSel!==null
+      ?`<button class="cta cpri" onclick="confirmWhat()">확인 →</button>`
+      :`<button class="cta cdis">선택해주세요</button>`;
+    if(sub==='what_fb') return `<button class="cta cpri" onclick="showNums()">다음 →</button>`;
+    if(sub==='nums') return ST.numSel.length>=2
+      ?`<button class="cta cpri" onclick="confirmNums()">확인 →</button>`
+      :`<button class="cta cdis">숫자를 골라요 (${ST.numSel.length}개 선택됨)</button>`;
+    if(sub==='nums_fb') return `<button class="cta cpri" onclick="finishStep2()">연산 고르기 →</button>`;
+  }
+  if(s===3){
+    if(sub==='start') return ST.opSel!==null
+      ?`<button class="cta cpri" onclick="confirmOp()">확인 →</button>`
+      :`<button class="cta cdis">연산을 골라주세요</button>`;
+    if(sub==='op_fb') return `<button class="cta cpri" onclick="finishStep3()">식 세우기 →</button>`;
+  }
+  if(s===4){
+    if(sub==='write') return `<button class="cta cpri" onclick="confirmWrite()">정답 확인 →</button>`;
+    if(sub==='write_wrong_fb') return '';
+    if(sub==='write_correct') return '';
+    if(sub==='choice') return ST.eqSel!==null
+      ?`<button class="cta cpri" onclick="confirmEq()">정답 확인 →</button>`
+      :`<button class="cta cdis">답을 골라주세요</button>`;
+    if(sub==='eq_wrong_fb'||sub==='eq_correct') return '';
+  }
+  if(s===5){
+    const last=ST.pi>=ST.PS.length-1;
+    return `<button class="cta cpri" onclick="nxt()">${last?'결과 보기 →':'다음 문제 →'}</button>
+            <button class="cta cout" onclick="resetCur()">이 문제 다시 풀기</button>`;
+  }
+  return '';
+}
+
+/* ════════════════════════════════════════════
+   액션 함수 (v4와 동일)
+   ════════════════════════════════════════════ */
+function ok1(){ ST.doneSteps.push(1); ST.step=2; ST.sub='start'; render(); }
+function selWhat(i){ ST.whatSel=i; render(); }
+function confirmWhat(){ ST.sub='what_fb'; render(); }
+function showNums(){ ST.sub='nums'; render(); }
+function togNum(i){ const x=ST.numSel.indexOf(i); x>=0?ST.numSel.splice(x,1):ST.numSel.push(i); render(); }
+function confirmNums(){ ST.sub='nums_fb'; render(); }
+function finishStep2(){ ST.doneSteps.push(2); ST.step=3; ST.sub='start'; render(); }
+function selOp(i){ ST.opSel=i; render(); }
+function confirmOp(){ ST.sub='op_fb'; render(); }
+function finishStep3(){ ST.doneSteps.push(3); ST.step=4; ST.sub='write'; ST.step4Write=''; render(); }
+function selEq(c){ ST.eqSel=c; render(); }
+
+/* ── 4단계: 직접 쓰기 ── */
+function confirmWrite(){
+  const inp=document.getElementById('write4-inp');
+  const val=(inp?inp.value:ST.step4Write).trim();
+  if(!val){
+    const el=document.getElementById('write4-inp');
+    if(el){ el.classList.remove('shk'); void el.offsetWidth; el.classList.add('shk'); el.focus(); }
+    return;
+  }
+  ST.step4Write=val;
+  const p=ST.PS[ST.pi];
+  const norm=s=>String(s).replace(/\s/g,'').toLowerCase();
+  if(norm(val)===norm(p.eq.ans)){
+    ST.sub='write_correct';
+    if(!ST.step4Tracked){ ST.correct++; ST.xp+=3; ST.step4Tracked=true; }
+    render();
+    setTimeout(()=>{ ST.doneSteps.push(4); ST.step=5; ST.sub='start'; render(); },900);
+  } else {
+    if(!ST.step4Tracked){ ST.wrong++; ST.step4Tracked=true;
+      if(!ST.weakTypes.includes(p.type)) ST.weakTypes.push(p.type); }
+    ST.sub='write_wrong_fb'; render();
+  }
+}
+function retryWrite(){ ST.step4Write=''; ST.sub='write'; render(); }
+function showChoice(){ ST.eqSel=null; ST.sub='choice'; render(); }
+
+/* ── 4단계: 선택지 ── */
+function confirmEq(){
+  const p=ST.PS[ST.pi];
+  if(ST.eqSel===p.eq.ans){
+    ST.sub='eq_correct';
+    if(!ST.step4Tracked){ ST.correct++; ST.xp+=3; ST.step4Tracked=true; }
+    render();
+    setTimeout(()=>{ ST.doneSteps.push(4); ST.step=5; ST.sub='start'; render(); },900);
+  } else {
+    ST.sub='eq_wrong_fb';
+    if(!ST.step4Tracked){ ST.wrong++; ST.step4Tracked=true;
+      if(!ST.weakTypes.includes(p.type)) ST.weakTypes.push(p.type); }
+    render();
+  }
+}
+function retryEq(){ ST.eqSel=null; ST.sub='choice'; render(); }
+function skipToStep5(){ ST.doneSteps.push(4); ST.step=5; ST.sub='start'; render(); }
+function nxt(){
+  if(ST.pi<ST.PS.length-1){ ST.pi++; resetSteps(); render(); }
+  else{ ST.screen='done'; render(); }
+}
+function resetCur(){ resetSteps(); render(); }
+
+/* ════════════════════════════════════════════
+   완료 화면
+   ════════════════════════════════════════════ */
+function rDone(){
+  const gi=GRADE_INFO[ST.grade];
+  const rate=Math.round((ST.correct/ST.PS.length)*100);
+  const em=rate>=80?'🎉':rate>=60?'👍':'💪';
+  const msg=rate>=80?'훌륭해요! 문장을 읽는 눈이 생겼어요.':rate>=60?'잘했어요! 조금만 더 연습해봐요.':'괜찮아요! 다시 한 번 해봐요.';
+  const gained=ST.xp-24;
+  const wh=ST.weakTypes.length>0
+    ?ST.weakTypes.map(t=>`<span class="wtag wbad">${t}</span>`).join('')
+    :`<span class="wtag wok">오답 유형 없음</span>`;
+  $a.innerHTML=`
+  <div class="full fi">
+    <div class="dem">${em}</div>
+    <div style="font-size:13px;font-weight:700;padding:4px 14px;border-radius:var(--rf);background:${gi.bg};color:${gi.color};margin-bottom:10px">${gi.label} 완료</div>
+    <div class="dt">${rate}점 달성!</div>
+    <div class="ds">${msg}</div>
+    <div class="sg">
+      <div class="sc"><div class="sn">${ST.correct}</div><div class="sl">정답</div></div>
+      <div class="sc"><div class="sn">${ST.wrong}</div><div class="sl">오답</div></div>
+      <div class="sc"><div class="sn">+${gained}</div><div class="sl">획득 XP</div></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--g77);margin-bottom:8px;align-self:flex-start">오답 유형</div>
+    <div class="wr" style="align-self:flex-start">${wh}</div>
+  </div>
+  <div class="btm">
+    <button class="cta cpri" onclick="restartGrade()" style="background:${gi.color}">이 학년 다시 풀기</button>
+    <button class="cta cout" onclick="goGradeSelect()" style="color:${gi.color};border-color:${gi.color}">다른 학년 선택</button>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════
+   유틸
+   ════════════════════════════════════════════ */
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escJs(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function goBack(){
+  if(ST.screen==='problem'){
+    const s2=['start','what_fb','nums','nums_fb'];
+    const s3=['start','op_fb'];
+    if(ST.step===2){ const i=s2.indexOf(ST.sub); if(i>0){ST.sub=s2[i-1];render();return;} }
+    if(ST.step===3){ const i=s3.indexOf(ST.sub); if(i>0){ST.sub=s3[i-1];render();return;} }
+    if(ST.step===4){
+      const s4=['write','write_wrong_fb','choice','eq_wrong_fb'];
+      const i=s4.indexOf(ST.sub);
+      if(i>0){ ST.sub=s4[i-1]; if(ST.sub==='write'){ ST.step4Write=''; } ST.eqSel=null; render(); return; }
+    }
+    if(ST.step>1){
+      ST.step--; ST.doneSteps=ST.doneSteps.filter(n=>n<ST.step);
+      ST.sub=ST.step===2?'nums_fb':ST.step===3?'op_fb':'write';
+      if(ST.step===4) ST.step4Write='';
+      render();
+    } else if(ST.pi>0){ ST.pi--; resetSteps(); ST.step=5; ST.doneSteps=[1,2,3,4,5]; render(); }
+    else { ST.screen='grade-select'; render(); }
+  } else if(ST.screen==='grade-select'){ ST.screen='intro'; render(); }
+  else { ST.screen='grade-select'; render(); }
+}
+function restartGrade(){ startGrade(ST.grade); }
+function goGradeSelect(){ ST.screen='grade-select'; render(); }
+function goIntro(){ ST.screen='intro'; ST.grade=null; ST.selTopic=null; render(); }
+
+function tts(id){
+  let p=null;
+  for(const g of Object.values(ALL_PROBLEMS)){
+    p=g.find(x=>x.id===id); if(p) break;
+  }
+  if(!p) return;
+  const txt=p.sh.replace(/<[^>]+>/g,'')+' '+p.qh.replace(/<[^>]+>/g,'');
+  if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.lang='ko-KR'; u.rate=0.88;
+    window.speechSynthesis.speak(u);
+  }
+}
+
+/* ════════════════════════════════════════════
+   계산 연습장 모달
+   ════════════════════════════════════════════ */
+let _sc = { ctx:null, drawing:false, color:'#1677FF', erase:false, size:2.5,
+            lastX:0, lastY:0 };
+
+function openScratch(){
+  if(document.getElementById('scratch-modal')) return;
+  const modal=document.createElement('div');
+  modal.className='scratch-overlay'; modal.id='scratch-modal';
+  modal.innerHTML=`
+  <div class="scratch-box">
+    <div class="scratch-header">
+      <span style="font-size:15px;font-weight:800;flex:1">✏️ 계산 연습장</span>
+      <button class="scr-tool" onclick="clearScratch()" style="margin-right:6px">전체 지우기</button>
+      <button style="width:32px;height:32px;border-radius:50%;border:none;background:var(--gEE);font-size:16px;cursor:pointer;color:var(--g55)" onclick="closeScratch()">✕</button>
+    </div>
+    <div class="scratch-canvas-wrap">
+      <canvas id="scratch-canvas"></canvas>
+    </div>
+    <div id="ai-fb-area" class="ai-fb-area"></div>
+    <div class="scratch-toolbar">
+      <button class="scr-col active" id="scr-c0" style="background:#212121" title="검정" onclick="setScratchColor('#212121',0)"></button>
+      <button class="scr-col" id="scr-c1" style="background:#1677FF" title="파랑" onclick="setScratchColor('#1677FF',1)"></button>
+      <button class="scr-col" id="scr-c2" style="background:#FB1A18" title="빨강" onclick="setScratchColor('#FB1A18',2)"></button>
+      <button class="scr-col" id="scr-c3" style="background:#4CAF50" title="초록" onclick="setScratchColor('#4CAF50',3)"></button>
+      <div style="width:1px;height:22px;background:var(--gEE);margin:0 2px;flex-shrink:0"></div>
+      <button class="scr-tool" id="scr-erase" onclick="toggleScratchErase()">지우개</button>
+      <div style="flex:1"></div>
+      <div class="scr-size">
+        <button class="scr-sz active" id="sz-s" onclick="setScratchSize(2.5,'s')">S</button>
+        <button class="scr-sz" id="sz-m" onclick="setScratchSize(5,'m')">M</button>
+        <button class="scr-sz" id="sz-l" onclick="setScratchSize(9,'l')">L</button>
+      </div>
+    </div>
+    <div style="padding:10px 12px;border-top:1px solid var(--gEE);background:#fff;flex-shrink:0">
+      <button class="ai-analyze-btn" id="ai-analyze-btn" onclick="analyzeWithAI()" style="width:100%;justify-content:center">
+        <span class="btn-spark">✨</span> AI 풀이 분석 받기
+      </button>
+    </div>
+  </div>`;
+  document.querySelector('.phone').appendChild(modal);
+
+  // init canvas
+  requestAnimationFrame(()=>{
+    const wrap=modal.querySelector('.scratch-canvas-wrap');
+    const canvas=document.getElementById('scratch-canvas');
+    canvas.width=wrap.offsetWidth; canvas.height=wrap.offsetHeight;
+    _sc.ctx=canvas.getContext('2d');
+    _sc.color='#212121'; _sc.erase=false; _sc.size=2.5; _sc.hasContent=false;
+    _applyScStyle();
+
+    // Faint grid lines
+    const ctx=_sc.ctx;
+    ctx.save(); ctx.strokeStyle='#E8EEF7'; ctx.lineWidth=0.5;
+    for(let y=24;y<canvas.height;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+    ctx.restore();
+
+    canvas.addEventListener('mousedown',_scrStart);
+    canvas.addEventListener('mousemove',_scrMove);
+    canvas.addEventListener('mouseup',_scrEnd);
+    canvas.addEventListener('mouseleave',_scrEnd);
+    canvas.addEventListener('touchstart',_scrTStart,{passive:false});
+    canvas.addEventListener('touchmove',_scrTMove,{passive:false});
+    canvas.addEventListener('touchend',_scrEnd);
+  });
+}
+
+function closeScratch(){
+  const m=document.getElementById('scratch-modal');
+  if(m) m.remove();
+  _sc.ctx=null; _sc.drawing=false;
+}
+
+function clearScratch(){
+  const canvas=document.getElementById('scratch-canvas');
+  if(!canvas||!_sc.ctx) return;
+  _sc.ctx.clearRect(0,0,canvas.width,canvas.height);
+  _sc.hasContent=false;
+  // Redraw grid
+  const ctx=_sc.ctx;
+  ctx.save(); ctx.strokeStyle='#E8EEF7'; ctx.lineWidth=0.5;
+  for(let y=24;y<canvas.height;y+=24){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke(); }
+  ctx.restore();
+  // Hide AI feedback
+  const fb=document.getElementById('ai-fb-area');
+  if(fb){ fb.classList.remove('show'); fb.innerHTML=''; }
+}
+
+function setScratchColor(col,idx){
+  _sc.color=col; _sc.erase=false;
+  for(let i=0;i<4;i++){
+    const b=document.getElementById('scr-c'+i);
+    if(b) b.classList.toggle('active',i===idx);
+  }
+  const eb=document.getElementById('scr-erase');
+  if(eb) eb.classList.remove('active');
+  _applyScStyle();
+}
+
+function toggleScratchErase(){
+  _sc.erase=!_sc.erase;
+  const eb=document.getElementById('scr-erase');
+  if(eb) eb.classList.toggle('active',_sc.erase);
+  _applyScStyle();
+}
+
+function setScratchSize(sz,key){
+  _sc.size=sz;
+  ['s','m','l'].forEach(k=>{
+    const b=document.getElementById('sz-'+k);
+    if(b) b.classList.toggle('active',k===key);
+  });
+  _applyScStyle();
+}
+
+function _applyScStyle(){
+  if(!_sc.ctx) return;
+  _sc.ctx.strokeStyle=_sc.erase?'#FAFBFF':_sc.color;
+  _sc.ctx.lineWidth=_sc.erase?_sc.size*6:_sc.size;
+  _sc.ctx.lineCap='round'; _sc.ctx.lineJoin='round';
+  _sc.ctx.globalCompositeOperation=_sc.erase?'destination-out':'source-over';
+}
+
+function _scrPos(e,canvas){
+  const r=canvas.getBoundingClientRect();
+  return {x:e.clientX-r.left, y:e.clientY-r.top};
+}
+function _scrStart(e){
+  _sc.drawing=true; _sc.hasContent=true;
+  const c=e.currentTarget;
+  const {x,y}=_scrPos(e,c);
+  _sc.lastX=x; _sc.lastY=y;
+  _sc.ctx.beginPath(); _sc.ctx.arc(x,y,_sc.ctx.lineWidth/2,0,Math.PI*2); _sc.ctx.fill();
+}
+function _scrMove(e){
+  if(!_sc.drawing) return;
+  const c=e.currentTarget;
+  const {x,y}=_scrPos(e,c);
+  _sc.ctx.beginPath(); _sc.ctx.moveTo(_sc.lastX,_sc.lastY); _sc.ctx.lineTo(x,y); _sc.ctx.stroke();
+  _sc.lastX=x; _sc.lastY=y;
+}
+function _scrEnd(){ _sc.drawing=false; }
+
+function _scrTStart(e){ e.preventDefault(); if(!e.touches[0]) return;
+  _sc.drawing=true; _sc.hasContent=true;
+  const c=e.currentTarget; const r=c.getBoundingClientRect();
+  _sc.lastX=e.touches[0].clientX-r.left; _sc.lastY=e.touches[0].clientY-r.top;
+  _sc.ctx.beginPath(); _sc.ctx.arc(_sc.lastX,_sc.lastY,_sc.ctx.lineWidth/2,0,Math.PI*2); _sc.ctx.fill();
+}
+function _scrTMove(e){ e.preventDefault(); if(!_sc.drawing||!e.touches[0]) return;
+  const c=e.currentTarget; const r=c.getBoundingClientRect();
+  const x=e.touches[0].clientX-r.left; const y=e.touches[0].clientY-r.top;
+  _sc.ctx.beginPath(); _sc.ctx.moveTo(_sc.lastX,_sc.lastY); _sc.ctx.lineTo(x,y); _sc.ctx.stroke();
+  _sc.lastX=x; _sc.lastY=y;
+}
+
+/* ════════════════════════════════════════════
+   AI 풀이 분석 (Claude Vision API)
+   ════════════════════════════════════════════ */
+async function analyzeWithAI(){
+  const canvas=document.getElementById('scratch-canvas');
+  const fbArea=document.getElementById('ai-fb-area');
+  const btn=document.getElementById('ai-analyze-btn');
+  if(!canvas||!fbArea) return;
+
+  /* 빈 연습장 */
+  if(!_sc.hasContent){
+    fbArea.innerHTML=`<div class="ai-fb-badge empty">📝 연습장이 비어 있어요</div>
+      <div class="ai-fb-row"><span class="ai-fb-icon">💡</span>
+        <span class="ai-fb-txt">풀이 과정을 먼저 연습장에 써주세요. 그러면 AI가 어느 단계가 틀렸는지 분석해줄게요!</span>
+      </div>`;
+    fbArea.classList.add('show');
+    fbArea.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+
+  /* 로딩 */
+  btn.disabled=true;
+  btn.innerHTML='<span class="btn-spark">✨</span> 분석 중...';
+  fbArea.innerHTML=`<div class="ai-loading">
+    <div class="ai-loading-dot"></div>
+    <div class="ai-loading-dot"></div>
+    <div class="ai-loading-dot"></div>
+    <span>AI가 풀이를 분석하고 있어요...</span>
+  </div>`;
+  fbArea.classList.add('show');
+  fbArea.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  /* 현재 문제 컨텍스트 */
+  const p=ST.PS[ST.pi];
+  const bp=p.eq.blankPos!==undefined?p.eq.blankPos:2;
+  const result=p.eq.result!==undefined?p.eq.result:p.eq.ans;
+  const eqFull=bp===0?`${p.eq.ans} ${p.eq.op} ${p.eq.g[1]} = ${result}`:
+               bp===1?`${p.eq.g[0]} ${p.eq.op} ${p.eq.ans} = ${result}`:
+                      `${p.eq.g[0]} ${p.eq.op} ${p.eq.g[1]} = ${result}`;
+  const blankDesc=bp===0?`빈칸(앞)의 정답: ${p.eq.ans}`:
+                  bp===1?`빈칸(중간)의 정답: ${p.eq.ans}`:
+                         `빈칸(결과)의 정답: ${result}`;
+  const probTxt=p.sh.replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
+  const qTxt=p.qh.replace(/<[^>]+>/g,'').trim();
+
+  /* 캔버스 → 흰 배경 합성 → base64 PNG */
+  const tmp=document.createElement('canvas');
+  tmp.width=canvas.width; tmp.height=canvas.height;
+  const tc=tmp.getContext('2d');
+  tc.fillStyle='#FFFFFF'; tc.fillRect(0,0,tmp.width,tmp.height);
+  tc.drawImage(canvas,0,0);
+  const b64=tmp.toDataURL('image/png').split(',')[1];
+
+  /* /api/analyze 서버리스 함수 호출 (API 키는 서버에서 관리) */
+  try{
+    const res=await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        base64: b64,
+        problem:{
+          text: probTxt,
+          question: qTxt,
+          equation: eqFull,
+          blankDesc: blankDesc,
+          answer: String(p.eq.ans),
+          result: String(result)
+        }
+      })
+    });
+    if(!res.ok){
+      const e=await res.json().catch(()=>({}));
+      throw new Error(e.error||`서버 오류 (${res.status})`);
+    }
+    const fb=await res.json();
+    _renderAIFb(fbArea,fb);
+  }catch(err){
+    fbArea.innerHTML=`<div class="ai-fb-row"><span class="ai-fb-icon">⚠️</span>
+      <span class="ai-fb-txt" style="color:#8B0000">AI 연결에 실패했어요. 잠시 후 다시 시도해봐요.<br>
+      <small style="color:var(--g99)">${escHtml(err.message||'')}</small></span></div>`;
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='<span class="btn-spark">✨</span> AI 풀이 분석 받기';
+    fbArea.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+}
+
+function _renderAIFb(area,fb){
+  const SM={
+    correct:{label:'✅ 풀이가 맞아요!',cls:'ok'},
+    wrong:{label:'❌ 틀린 부분이 있어요',cls:'ng'},
+    incomplete:{label:'⚠️ 풀이가 완성되지 않았어요',cls:'inc'},
+    empty:{label:'📝 연습장이 비어 있어요',cls:'empty'},
+  };
+  const s=SM[fb.status]||SM.incomplete;
+  let h=`<div class="ai-fb-badge ${s.cls}">${s.label}</div>`;
+  if(fb.recognized){
+    h+=`<div class="ai-fb-row">
+      <span class="ai-fb-icon">👁️</span>
+      <span class="ai-fb-txt"><strong>인식된 풀이:</strong> ${escHtml(fb.recognized)}</span>
+    </div>`;
+  }
+  if(fb.errors&&fb.errors.length>0){
+    fb.errors.forEach(e=>{ h+=`<div class="ai-fb-err">⚠️ ${escHtml(e)}</div>`; });
+  }
+  if(fb.advice){
+    h+=`<div class="ai-fb-advice">💡 ${escHtml(fb.advice)}</div>`;
+  }
+  area.innerHTML=h;
+}
+
+render();
+</script>
+</body>
+</html>
