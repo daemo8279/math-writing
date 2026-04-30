@@ -15,40 +15,40 @@ async function handler(req, res) {
   const { text = '', question = '', equation = '', answer = '' } = problem;
   const isImage = !!base64;
 
-  // ── 시스템 프롬프트 (JSON 템플릿에 한국어 섞지 않음) ──
-  const SYSTEM = [
-    '너는 초등수학 전문 선생님이야.',
-    isImage
-      ? '학생이 손으로 쓴 풀이 이미지를 받을 거야. 손글씨를 읽고 채점해줘.'
-      : '학생의 서술형 답안 텍스트를 채점해줘.',
-    '',
-    '아래 JSON 형식으로만 응답해. 백틱이나 설명 텍스트는 절대 쓰지 마.',
-    '모든 숫자 필드는 반드시 숫자(integer)여야 해. 문자열로 쓰면 안 돼.',
-    '',
-    '{"recognized":"풀이 내용 요약","score":75,"accuracy":80,"process":70,"expression":60,"feedback":"피드백 2~3문장","modelAnswer":"모범 답안 2~4문장"}',
-    '',
-    '각 필드 설명:',
-    '- recognized: ' + (isImage ? '이미지에서 읽은 손글씨 내용 요약' : '학생이 쓴 답안 요약'),
-    '- score: 종합 점수 0~100 정수',
-    '- accuracy: 정확성(계산·답이 맞는지) 0~100 정수',
-    '- process: 풀이과정(단계별로 논리적인지) 0~100 정수',
-    '- expression: 표현력(문장 설명이 잘 됐는지) 0~100 정수',
-    '- feedback: 잘한 점 먼저, 개선점은 뒤에, 초등학생 눈높이로',
-    '- modelAnswer: 완전한 모범 답안 (식 + 문장)',
-    '',
-    '채점 기준: score = round(accuracy×0.4 + process×0.4 + expression×0.2)',
-    '답이 완전히 맞으면 accuracy 90 이상, 식을 세우고 단계별로 풀었으면 process 80 이상.',
-  ].join('\n');
+  const SYSTEM = `너는 초등학생의 수학 서술형 답안을 채점하는 선생님이야.
+${isImage ? '학생이 손으로 쓴 풀이 이미지야. 손글씨를 읽고 채점해줘.' : ''}
+
+채점할 때 아래 기준을 반드시 따라줘:
+
+[정확성 accuracy 채점 기준 — 가장 중요]
+- 최종 답의 숫자가 정답과 일치하면 accuracy 85 이상을 줘
+- 식은 틀렸지만 답이 맞으면 accuracy 70
+- 답이 없거나 완전히 틀리면 accuracy 30 이하
+
+[풀이과정 process 채점 기준]
+- 계산식을 쓰고 과정을 설명했으면 process 80 이상
+- 답만 썼으면 process 40
+- 아무것도 없으면 process 10
+
+[표현력 expression 채점 기준]
+- 문장으로 답을 설명했으면 expression 80 이상
+- 숫자만 썼으면 expression 40
+
+[중요] 초등학생 답안이라서 맞춤법이 틀리거나 식 표현이 서툴러도 관대하게 봐줘.
+답의 숫자가 맞으면 무조건 accuracy를 높게 줘야 해.
+
+아래 JSON 형식으로만 응답해. 백틱 없이. 모든 점수는 정수.
+
+{"recognized":"답안 요약","score":75,"accuracy":85,"process":70,"expression":60,"feedback":"피드백","modelAnswer":"모범답안"}`;
 
   const userText = [
-    '[문제 정보]',
-    `상황: ${text}`,
-    `질문: ${question}`,
-    `올바른 식과 답: ${equation} (정답: ${answer})`,
+    `[문제] ${text}`,
+    `[질문] ${question}`,
+    `[정답] ${answer} (식: ${equation})`,
     '',
     isImage
-      ? '위 이미지에 손으로 쓴 풀이를 채점해줘.'
-      : `[학생 답안]\n${studentAnswer}\n\n위 답안을 채점해줘.`,
+      ? '위 이미지의 손글씨 풀이를 채점해줘.'
+      : `[학생 답안]\n${studentAnswer}`,
   ].join('\n');
 
   const content = isImage
@@ -83,40 +83,35 @@ async function handler(req, res) {
 
     const data = await apiRes.json();
     const rawText = (data.content || []).map(b => b.text || '').join('');
-    console.log('[grade] raw response:', rawText.slice(0, 300));
-
-    const clean = rawText.replace(/```json|```/g, '').trim();
+    console.log('[grade] raw:', rawText.slice(0, 400));
 
     let result;
     try {
-      result = JSON.parse(clean);
-    } catch (parseErr) {
-      console.error('[grade] JSON parse error:', parseErr.message, '| raw:', clean.slice(0, 200));
-      // JSON 파싱 실패 시 안전한 기본값
+      result = JSON.parse(rawText.replace(/```json|```/g, '').trim());
+    } catch (e) {
+      console.error('[grade] parse error:', e.message);
       result = {
-        recognized: isImage ? '손글씨를 인식했어요.' : studentAnswer?.slice(0, 80) || '',
+        recognized: studentAnswer?.slice(0, 80) || '손글씨 인식 완료',
         score: 50, accuracy: 50, process: 50, expression: 50,
-        feedback: '채점을 완료했어요! 풀이 과정을 더 자세히 쓰면 더 높은 점수를 받을 수 있어요.',
-        modelAnswer: `${equation}`,
+        feedback: '풀이를 확인했어요! 다음엔 풀이 과정을 단계별로 써봐요.',
+        modelAnswer: `${equation}이므로 답은 ${answer}입니다.`,
       };
     }
 
-    // 숫자 정규화 (문자열로 왔을 경우 대비)
+    // 점수 정규화
     const acc = Math.min(100, Math.max(0, parseInt(result.accuracy, 10) || 0));
     const prc = Math.min(100, Math.max(0, parseInt(result.process,  10) || 0));
-    const exp = Math.min(100, Math.max(0, parseInt(result.expression,10) || 0));
-
+    const exp = Math.min(100, Math.max(0, parseInt(result.expression, 10) || 0));
     result.accuracy   = acc;
     result.process    = prc;
     result.expression = exp;
     result.score      = Math.round(acc * 0.4 + prc * 0.4 + exp * 0.2);
 
-    console.log('[grade] final scores — score:', result.score, 'acc:', acc, 'prc:', prc, 'exp:', exp);
-
+    console.log('[grade] scores — score:', result.score, 'acc:', acc, 'prc:', prc, 'exp:', exp);
     return res.status(200).json(result);
 
   } catch (err) {
-    console.error('[grade] unexpected error:', err.message);
+    console.error('[grade] error:', err.message);
     return res.status(500).json({ error: `서버 오류: ${err.message}` });
   }
 }
