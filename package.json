@@ -1,0 +1,9 @@
+{
+  "name": "math-reading-app",
+  "version": "1.0.0",
+  "description": "초등 수학 문장제 읽기 훈련 앱 (AI 풀이 분석 포함)",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
